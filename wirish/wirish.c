@@ -33,15 +33,30 @@
 #include "nvic.h"
 #include "usb.h"
 
+static void flash_init(void) {
+   flash_enable_prefetch();
+   flash_set_latency(2);
+}
+
 void init(void) {
-   rcc_init();
+   struct rcc_device maple_rcc_dev = {
+      .apb1_prescale = RCC_APB1_HCLK_DIV_2,
+      .apb2_prescale = RCC_APB2_HCLK_DIV_1,
+      .ahb_prescale  = RCC_AHB_SYSCLK_DIV_1,
+      .sysclk_src    = RCC_CLKSRC_PLL,
+      .pll_src       = RCC_PLLSRC_HSE,
+      .pll_mul       = RCC_PLLMUL_9
+   };
+
+   flash_init();
+   rcc_init(&maple_rcc_dev);
    nvic_init();
    systick_init();
    gpio_init();
-   adc_init();
-   timer_init(1, 1);
-   timer_init(2, 1);
-   timer_init(3, 1);
-   timer_init(4, 1);
-   setupUSB();
+//   adc_init();
+//   timer_init(1, 1);
+//   timer_init(2, 1);
+//   timer_init(3, 1);
+//   timer_init(4, 1);
+//   setupUSB();
 }

@@ -33,105 +33,62 @@
 #include "flash.h"
 #include "rcc.h"
 
-static void set_ahb_prescaler(uint32 divider) {
-   uint32 cfgr = __read(RCC_CFGR);
+#define RCC_CFGR_PPRE1                           (0x7 << 8)
+#define RCC_CFGR_PPRE2                           (0x7 << 11)
+#define RCC_CFGR_HPRE                            (0xF << 4)
+#define RCC_CFGR_PLLSRC                          (0x1 << 16)
 
-   cfgr &= ~HPRE;
+#define RCC_CFGR_SWS                             (0x3 << 2)
+#define RCC_CFGR_SWS_PLL                         (0x2 << 2)
 
-   switch (divider) {
-   case SYSCLK_DIV_1:
-      cfgr |= SYSCLK_DIV_1;
-      break;
-   default:
-      ASSERT(0);
-   }
+#define RCC_CFGR_SW                              (0x3 << 0)
+#define RCC_CFGR_SW_PLL                          (0x2 << 0)
 
-   __write(RCC_CFGR, cfgr);
-}
+/* CR status bits  */
+#define RCC_CR_HSEON                             (0x1 << 16)
+#define RCC_CR_HSERDY                            (0x1 << 17)
+#define RCC_CR_PLLON                             (0x1 << 24)
+#define RCC_CR_PLLRDY                            (0x1 << 25)
 
-static void set_apb1_prescaler(uint32 divider) {
-   uint32 cfgr = __read(RCC_CFGR);
 
-   cfgr &= ~PPRE1;
+#define RCC_WRITE_CFGR(val)          __write(RCC_CFGR, val)
+#define RCC_READ_CFGR()              __read(RCC_CFGR)
 
-   switch (divider) {
-   case HCLK_DIV_2:
-      cfgr |= HCLK_DIV_2;
-      break;
-   default:
-      ASSERT(0);
-   }
+#define RCC_WRITE_CR(val)            __write(RCC_CR, val)
+#define RCC_READ_CR()                __read(RCC_CR)
 
-   __write(RCC_CFGR, cfgr);
-}
+void rcc_init(struct rcc_device *dev) {
+   /* Assume that we're going to clock the chip off the PLL, fed by
+    * the HSE */
+   ASSERT(dev->sysclk_src == RCC_CLKSRC_PLL &&
+          dev->pll_src    == RCC_PLLSRC_HSE);
 
-static void set_apb2_prescaler(uint32 divider) {
-   uint32 cfgr = __read(RCC_CFGR);
+   uint32 cfgr = 0;
+   uint32 cr = RCC_READ_CR();
 
-   cfgr &= ~PPRE2;
+   cfgr |= (dev->apb1_prescale |
+            dev->apb2_prescale |
+            dev->ahb_prescale  |
+            dev->pll_src       |
+            dev->pll_mul);
 
-   switch (divider) {
-   case HCLK_DIV_1:
-      cfgr |= HCLK_DIV_1;
-      break;
-   default:
-      ASSERT(0);
-   }
+   RCC_WRITE_CFGR(cfgr);
 
-   __write(RCC_CFGR, cfgr);
-}
+   /* Now turn on the HSE  */
+   cr |= RCC_CR_HSEON;
+   RCC_WRITE_CR(cr);
+   while (!(RCC_READ_CR() & RCC_CR_HSERDY))
+      ;
 
-/* FIXME: magic numbers  */
-static void pll_init(void) {
-   uint32 cfgr;
+   /* Now the PLL  */
+   cr |= RCC_CR_PLLON;
+   RCC_WRITE_CR(cr);
+   while (!(RCC_READ_CR() & RCC_CR_PLLRDY))
+      ;
 
-   cfgr = __read(RCC_CFGR);
-   cfgr &= (~PLLMUL | PLL_INPUT_CLK_HSE);
-
-   /* pll multiplier 9, input clock hse */
-   __write(RCC_CFGR, cfgr | PLL_MUL_9 | PLL_INPUT_CLK_HSE);
-
-   /* enable pll  */
-   __set_bits(RCC_CR, PLLON);
-   while(!__get_bits(RCC_CR, PLLRDY)) {
-      asm volatile("nop");
-   }
-
-   /* select pll for system clock source  */
-   cfgr = __read(RCC_CFGR);
-   cfgr &= ~RCC_CFGR_SWS;
-   __write(RCC_CFGR, cfgr | RCC_CFGR_SWS_PLL);
-
-   while (__get_bits(RCC_CFGR, 0x00000008) != 0x8) {
-      asm volatile("nop");
-   }
-}
-
-static void hse_init(void) {
-   __set_bits(RCC_CR, HSEON);
-   while (!HSERDY) {
-      asm volatile("nop");
-   }
-}
-
-void rcc_init(void) {
-   hse_init();
-
-   /* Leave this here for now...  */
-   /* Enable Prefetch Buffer */
-   flash_enable_prefetch();
-
-   /* Flash 2 wait state */
-   flash_set_latency();
-
-   set_ahb_prescaler(SYSCLK_DIV_1);
-   set_apb1_prescaler(HCLK_DIV_2);
-   set_apb2_prescaler(HCLK_DIV_1);
-   pll_init();
-}
-
-void rcc_set_adc_prescaler(uint32 divider) {
-   uint32 cfgr = __read(RCC_CFGR);
-   cfgr &= ~ADCPRE;
-   __write(RCC_CFGR, cfgr | PCLK2_DIV_2);
+   /* Finally, let's switch over to the PLL  */
+   cfgr |= RCC_CFGR_SWS_PLL;
+   RCC_WRITE_CFGR(cfgr);
+   while ((RCC_READ_CFGR() & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL)
+      ;
 }
