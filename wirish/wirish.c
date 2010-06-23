@@ -27,18 +27,19 @@
  */
 
 #include "wirish.h"
-#include "rcc.h"
 #include "systick.h"
 #include "gpio.h"
 #include "nvic.h"
 #include "usb.h"
+#include "rcc.h"
+#include "flash.h"
 
-static void flash_init(void) {
+static void inline maple_flash_init(void) {
    flash_enable_prefetch();
-   flash_set_latency(2);
+   flash_set_latency(FLASH_WAIT_STATE_2);
 }
 
-void init(void) {
+static void inline maple_rcc_init(void) {
    struct rcc_device maple_rcc_dev = {
       .apb1_prescale = RCC_APB1_HCLK_DIV_2,
       .apb2_prescale = RCC_APB2_HCLK_DIV_1,
@@ -48,8 +49,11 @@ void init(void) {
       .pll_mul       = RCC_PLLMUL_9
    };
 
-   flash_init();
    rcc_init(&maple_rcc_dev);
+}
+void init(void) {
+   maple_flash_init();
+   maple_rcc_init();
    nvic_init();
    systick_init();
    gpio_init();

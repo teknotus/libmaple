@@ -28,24 +28,19 @@
 #define FLASH_BASE                      0x40022000
 #define FLASH_ACR                       FLASH_BASE
 
-#define FLASH_WRITE_ACR(val)            __write(FLASH_ACR, val)
-#define FLASH_READ_ACR()                __read(FLASH_ACR)
-
 #define ACR_PRFTBE                      BIT(4)
 #define ACR_PRFTBE_ENABLE               BIT(4)
 
 /* flash wait states  */
 #define ACR_LATENCY                     (0x7)
-#define ACR_LATENCY_0                   (0x0)
-#define ACR_LATENCY_1                   (0x1)
-#define ACR_LATENCY_2                   (0x2)
 
-static uint32 flash_wait_states[2] = {
-   ACR_LATENCY_0,
-   ACR_LATENCY_1,
-   ACR_LATENCY_2
-};
+#define FLASH_WRITE_ACR(val)            __write(FLASH_ACR, val)
+#define FLASH_READ_ACR()                __read(FLASH_ACR)
 
+
+/**
+ * @brief turn on the hardware prefetcher
+ */
 void flash_enable_prefetch(void) {
    uint32 val = FLASH_READ_ACR();
 
@@ -54,11 +49,16 @@ void flash_enable_prefetch(void) {
    FLASH_WRITE_ACR(val);
 }
 
+
+/**
+ * @brief set flash wait states
+ * @param number of wait states
+ */
 void flash_set_latency(uint32 wait_states) {
    uint32 val = FLASH_READ_ACR();
 
    val &= ~ACR_LATENCY;
-   val |= flash_wait_states[wait_states];
+   val |= wait_states;
 
    FLASH_WRITE_ACR(val);
 }

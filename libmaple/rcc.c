@@ -25,7 +25,7 @@
 /**
  *  @file rcc.c
  *
- *  @brief Implements pretty much only the basic clock setup on the maple,
+ *  @brief Implements pretty much only the basic clock setup on the stm32,
  *  exposes a handful of clock enable/disable and peripheral reset commands.
  */
 
@@ -40,9 +40,11 @@
 
 #define RCC_CFGR_SWS                             (0x3 << 2)
 #define RCC_CFGR_SWS_PLL                         (0x2 << 2)
+#define RCC_CFGR_SWS_HSE                         (0x1 << 2)
 
 #define RCC_CFGR_SW                              (0x3 << 0)
 #define RCC_CFGR_SW_PLL                          (0x2 << 0)
+#define RCC_CFGR_SW_HSE                          (0x1 << 0)
 
 /* CR status bits  */
 #define RCC_CR_HSEON                             (0x1 << 16)
@@ -50,13 +52,23 @@
 #define RCC_CR_PLLON                             (0x1 << 24)
 #define RCC_CR_PLLRDY                            (0x1 << 25)
 
+#define RCC_WRITE_CFGR(val)                      __write(RCC_CFGR, val)
+#define RCC_READ_CFGR()                          __read(RCC_CFGR)
 
-#define RCC_WRITE_CFGR(val)          __write(RCC_CFGR, val)
-#define RCC_READ_CFGR()              __read(RCC_CFGR)
+#define RCC_WRITE_CR(val)                        __write(RCC_CR, val)
+#define RCC_READ_CR()                            __read(RCC_CR)
 
-#define RCC_WRITE_CR(val)            __write(RCC_CR, val)
-#define RCC_READ_CR()                __read(RCC_CR)
-
+/**
+ * @brief Initialize the clock control system. Sets up only the basics:
+ *      APB1 clock prescaler
+ *      APB2 clock prescaler
+ *      AHB clock prescaler
+ *      System clock source (Must be PLL)
+ *      PLL clock source (Must be high-speed external clock)
+ *      PLL Multiplier
+ * @param dev initialization struct
+ * @sideeffect Switches clock source to PLL, clock speed to HSE_CLK*PLLMUL
+ */
 void rcc_init(struct rcc_device *dev) {
    /* Assume that we're going to clock the chip off the PLL, fed by
     * the HSE */
@@ -66,15 +78,14 @@ void rcc_init(struct rcc_device *dev) {
    uint32 cfgr = 0;
    uint32 cr = RCC_READ_CR();
 
-   cfgr |= (dev->apb1_prescale |
+   cfgr =  (dev->apb1_prescale |
             dev->apb2_prescale |
             dev->ahb_prescale  |
             dev->pll_src       |
             dev->pll_mul);
-
    RCC_WRITE_CFGR(cfgr);
 
-   /* Now turn on the HSE  */
+   /* Turn on the HSE  */
    cr |= RCC_CR_HSEON;
    RCC_WRITE_CR(cr);
    while (!(RCC_READ_CR() & RCC_CR_HSERDY))
@@ -87,7 +98,8 @@ void rcc_init(struct rcc_device *dev) {
       ;
 
    /* Finally, let's switch over to the PLL  */
-   cfgr |= RCC_CFGR_SWS_PLL;
+   cfgr &= ~RCC_CFGR_SW;
+   cfgr |= RCC_CFGR_SW_PLL;
    RCC_WRITE_CFGR(cfgr);
    while ((RCC_READ_CFGR() & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL)
       ;
