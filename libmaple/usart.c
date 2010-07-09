@@ -28,10 +28,17 @@
  *  @brief USART control routines
  */
 
+/* USART1 = APB2 72 mhz
+ * USART2 = APB1 36 mhz
+ * USART3 = APB1 36 mhz */
+
+#include <stdlib.h>
 #include "libmaple.h"
 #include "rcc.h"
 #include "nvic.h"
+#include "gpio.h"
 #include "usart.h"
+
 
 #define USART1_BASE         0x40013800
 #define USART2_BASE         0x40004400
@@ -55,6 +62,30 @@
 #define USART3_CLK          36000000UL
 
 #define USART_RECV_BUF_SIZE 64
+
+static const struct usart_dev usart_dev1 = {
+   .base = (void*)USART1_BASE,
+   .max_baud = 4500000U,
+   .gpio_port = (uint32)GPIOA_BASE,
+   .tx_pin = 9,
+   .rx_pin = 10,
+};
+
+static const struct usart_dev usart_dev2 = {
+   .base = (void*)USART2_BASE,
+   .max_baud = 2250000U,
+   .gpio_port = (uint32)GPIOA_BASE,
+   .tx_pin = 2,
+   .rx_pin = 3,
+};
+
+static const struct usart_dev usart_dev3 = {
+   .base = (void*)USART3_BASE,
+   .max_baud = 2250000U,
+   .gpio_port = (uint32)GPIOB_BASE,
+   .tx_pin = 10,
+   .rx_pin = 11,
+};
 
 /* Ring buffer notes:
  * The buffer is empty when head == tail.
@@ -126,7 +157,7 @@ void usart_init(uint8 usart_num, uint32 baud) {
     switch (usart_num) {
     case 1:
         port = (usart_port*)USART1_BASE;
-        ring_buf = &ring_buf1;
+        ring_buf = malloc(64);
         clk_speed = USART1_CLK;
         rcc_enable_clk_usart1();
         REG_SET(NVIC_ISER1, BIT(5));

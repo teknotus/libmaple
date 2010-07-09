@@ -23,45 +23,40 @@
  * ****************************************************************************/
 
 /**
- *  @file usart.h
- *
- *  @brief USART Definitions
+ *  @brief Maple board initialization
  */
 
-#ifndef _USART_H_
-#define _USART_H_
+#include "wirish.h"
+#include "rcc.h"
 
-#define NR_USARTS           0x3
+static void inline maple_flash_init(void) {
+   flash_enable_prefetch();
+   flash_set_latency(FLASH_WAIT_STATE_2);
+}
 
-#ifdef __cplusplus
-extern "C"{
-#endif
+static void inline maple_rcc_init(void) {
+   struct rcc_device maple_rcc_dev = {
+      .apb1_prescale = RCC_APB1_HCLK_DIV_2,
+      .apb2_prescale = RCC_APB2_HCLK_DIV_1,
+      .ahb_prescale  = RCC_AHB_SYSCLK_DIV_1,
+      .sysclk_src    = RCC_CLKSRC_PLL,
+      .pll_src       = RCC_PLLSRC_HSE,
+      .pll_mul       = RCC_PLLMUL_9
+   };
 
-struct usart_dev {
-   void *base;
-   uint32 max_baud;
-   uint32 gpio_port;
-   uint32 tx_pin;
-   uint32 rx_pin;
-};
+   rcc_init(&maple_rcc_dev);
+}
 
-#define USART_MAX_BAUD      225000
-
-void usart_init(uint8 usart_num, uint32 baud);
-void usart_disable(uint8 usart_num);
-
-void usart_putstr(uint8 usart_num, const char*);
-void usart_putudec(uint8 usart_num, uint32 val);
-void usart_putc(uint8 usart_num, uint8 ch);
-
-uint32 usart_data_available(uint8 usart_num);
-uint8 usart_getc(uint8 usart_num);
-void usart_clear_buffer(uint8 usart_num);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
-
-
-#endif
-
+void maple_init(void) {
+   maple_flash_init();
+   maple_rcc_init();
+   nvic_init();
+   systick_init();
+   gpio_init();
+//   adc_init();
+//   timer_init(1, 1);
+//   timer_init(2, 1);
+//   timer_init(3, 1);
+//   timer_init(4, 1);
+//   setupUSB();
+}
