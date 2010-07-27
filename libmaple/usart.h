@@ -31,22 +31,19 @@
 #ifndef _USART_H_
 #define _USART_H_
 
-#define NR_USARTS           0x3
-
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-struct usart_dev {
-   void *base;
-   uint32 max_baud;
-   uint32 gpio_port;
-   uint32 tx_pin;
-   uint32 rx_pin;
+enum {
+   USART1 = 0x0,
+   USART2,
+   USART3,
+   USART4,
+   USART5,
 };
 
-#define USART_MAX_BAUD      225000
-
+#define USART_MAX_BAUD 4500000
 void usart_init(uint8 usart_num, uint32 baud);
 void usart_disable(uint8 usart_num);
 

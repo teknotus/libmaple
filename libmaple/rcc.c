@@ -135,3 +135,42 @@ void rcc_set_adc_prescaler(uint32 divider) {
    cfgr &= ~ADCPRE;
    __write(RCC_CFGR, cfgr | PCLK2_DIV_2);
 }
+
+#define APB1 0
+#define APB2 1
+#define AHB  2
+
+struct rcc_dev_info {
+   const uint8 clk_domain;
+   const uint8 line_num;
+};
+
+static const struct rcc_dev_info rcc_dev_table[] = {
+   [RCC_USART1] = {
+      .clk_domain = APB2,
+      .line_num = 14
+   },
+   [RCC_USART2] = {
+      .clk_domain = APB1,
+      .line_num = 17
+   },
+   [RCC_USART3] = {
+      .clk_domain = APB1,
+      .line_num = 18
+   },
+};
+
+void rcc_enable_device(uint32 dev_num) {
+   uint8 clk_domain = rcc_dev_table[dev_num].clk_domain;
+
+   switch (clk_domain) {
+   case APB1:
+      __set_bits(RCC_APB1ENR, BIT(rcc_dev_table[dev_num].line_num));
+      break;
+   case APB2:
+      __set_bits(RCC_APB2ENR, BIT(rcc_dev_table[dev_num].line_num));
+      break;
+   case AHB:
+      break;
+   }
+}

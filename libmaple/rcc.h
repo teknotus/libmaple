@@ -130,6 +130,16 @@
 void rcc_init(void);
 void rcc_set_adc_prescaler(uint32 divider);
 
+enum {
+   RCC_USART1,
+   RCC_USART2,
+   RCC_USART3,
+   RCC_USART4,
+   RCC_USART5,
+};
+
+void rcc_enable_dev(uint32 dev);
+
 #endif
 
 

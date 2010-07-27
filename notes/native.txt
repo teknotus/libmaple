@@ -1,3 +1,49 @@
+diffs:
+stm32f103rbt6                                    stm32f103zet6
+==================================================================
+LQFP64 medium density performance line           LQFP144 high-density performance line
+128KB of flash                                   512
+20KB of ram                                      64Kb
+
+Peripherals:
+==================================================================
+51 GPIO   (PA-PD2)                               112 GPIOS (PA-PG)         >
+2 ADC                                            3 ADC                     >
+3 USART                                          5 UART                    >
+2 SPI                                            3 SPI                     >
+2 I2S                                            2 I2S                     ==
+2 I2C                                            2 I2C                     ==
+3 general timers                                 4 general timers          >
+1 advanced timer                                 2 advanced                >
+
+Extra peripherals:
+==================================================================
+                                                 2 basic timers for dac    
+                                                 2 DAC
+                                                 1 SDIO
+                                                 1 FSMC
+
+
+STM32F103RBT6           STM32F103ZET6
+================================================================================
+Function    Maple   Maple Native   Clock Domain   Max speed
+================================================================================
+USART1_TX   PA9     PA9            APB2           4500000
+USART1_RX   PA10    PA10
+
+USART2_TX   PA2     PA2            APB1           2250000
+USART2_RX   PA3     PA3
+
+USART3_TX   PB10    PB10           APB1           2250000
+USART3_RX   PB11    PB11
+
+UART4_TX   -        PC10           APB1           2250000
+UART4_RX   -        PC11
+
+UART5_TX   -        PC12           APB1           2250000
+UART5_RX   -        PD2
+================================================================================
+
 stm32f103zet6
 144-pin package
 flash 512KB (512Kx8)

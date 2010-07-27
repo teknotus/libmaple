@@ -36,9 +36,7 @@
 #include "libmaple.h"
 #include "rcc.h"
 #include "nvic.h"
-#include "gpio.h"
 #include "usart.h"
-
 
 #define USART1_BASE         0x40013800
 #define USART2_BASE         0x40004400
@@ -63,29 +61,17 @@
 
 #define USART_RECV_BUF_SIZE 64
 
-static const struct usart_dev usart_dev1 = {
-   .base = (void*)USART1_BASE,
-   .max_baud = 4500000U,
-   .gpio_port = (uint32)GPIOA_BASE,
-   .tx_pin = 9,
-   .rx_pin = 10,
-};
+#define NR_USARTS 3
 
-static const struct usart_dev usart_dev2 = {
-   .base = (void*)USART2_BASE,
-   .max_baud = 2250000U,
-   .gpio_port = (uint32)GPIOA_BASE,
-   .tx_pin = 2,
-   .rx_pin = 3,
-};
-
-static const struct usart_dev usart_dev3 = {
-   .base = (void*)USART3_BASE,
-   .max_baud = 2250000U,
-   .gpio_port = (uint32)GPIOB_BASE,
-   .tx_pin = 10,
-   .rx_pin = 11,
-};
+typedef struct usart_port {
+    volatile uint32 SR;       // Status register
+    volatile uint32 DR;       // Data register
+    volatile uint32 BRR;      // Baud rate register
+    volatile uint32 CR1;      // Control register 1
+    volatile uint32 CR2;      // Control register 2
+    volatile uint32 CR3;      // Control register 3
+    volatile uint32 GTPR;     // Guard time and prescaler register
+} usart_port;
 
 /* Ring buffer notes:
  * The buffer is empty when head == tail.
@@ -102,15 +88,33 @@ static usart_ring_buf ring_buf1;
 static usart_ring_buf ring_buf2;
 static usart_ring_buf ring_buf3;
 
-typedef struct usart_port {
-    volatile uint32 SR;       // Status register
-    volatile uint32 DR;       // Data register
-    volatile uint32 BRR;      // Baud rate register
-    volatile uint32 CR1;      // Control register 1
-    volatile uint32 CR2;      // Control register 2
-    volatile uint32 CR3;      // Control register 3
-    volatile uint32 GTPR;     // Guard time and prescaler register
-} usart_port;
+struct usart_dev {
+   usart_port *base;
+   usart_ring_buf *buf;
+   const uint8 rcc_dev_num;
+   const uint8 nvic_dev_num;
+};
+
+static const struct usart_dev usart_dev_table[] = {
+   [USART1] = {
+      .base = (usart_port*)USART1_BASE,
+      .buf = &ring_buf1,
+      .rcc_dev_num = RCC_USART1,
+      .nvic_dev_num = NVIC_USART1
+   },
+   [USART2] = {
+      .base = (usart_port*)USART2_BASE,
+      .buf = &ring_buf2,
+      .rcc_dev_num = RCC_USART2,
+      .nvic_dev_num = NVIC_USART2
+   },
+   [USART3] = {
+      .base = (usart_port*)USART3_BASE,
+      .buf = &ring_buf3,
+      .rcc_dev_num = RCC_USART3,
+      .nvic_dev_num = NVIC_USART3
+   },
+};
 
 void USART1_IRQHandler(void) {
     /* Read the data  */
@@ -143,9 +147,6 @@ void USART3_IRQHandler(void) {
  *  @sideeffect Turns on the specified USART
  */
 void usart_init(uint8 usart_num, uint32 baud) {
-    ASSERT((usart_num <= NR_USARTS) && (usart_num > 0));
-    ASSERT(baud && (baud < USART_MAX_BAUD));
-
     usart_port *port;
     usart_ring_buf *ring_buf;
 
@@ -154,32 +155,13 @@ void usart_init(uint8 usart_num, uint32 baud) {
     uint32 fractional_part;
     uint32 tmp;
 
-    switch (usart_num) {
-    case 1:
-        port = (usart_port*)USART1_BASE;
-        ring_buf = malloc(64);
-        clk_speed = USART1_CLK;
-        rcc_enable_clk_usart1();
-        REG_SET(NVIC_ISER1, BIT(5));
-        break;
-    case 2:
-        port = (usart_port*)USART2_BASE;
-        ring_buf = &ring_buf2;
-        clk_speed = USART2_CLK;
-        rcc_enable_clk_usart2();
-        REG_SET(NVIC_ISER1, BIT(6));
-        break;
-    case 3:
-        port = (usart_port*)USART3_BASE;
-        ring_buf = &ring_buf3;
-        clk_speed = USART3_CLK;
-        rcc_enable_clk_usart3();
-        REG_SET(NVIC_ISER1, BIT(7));
-        break;
-    default:
-        /* should never get here  */
-        ASSERT(0);
-    }
+    port = usart_dev_table[usart_num].base;
+    ring_buf = usart_dev_table[usart_num].buf;
+    rcc_enable_device(usart_dev_table[usart_num].rcc_dev_num);
+    nvic_enable_interrupt(usart_dev_table[usart_num].nvic_dev_num);
+
+    /* usart1 is mad fast  */
+    clk_speed = (usart_num == USART1) ? 72000000UL : 36000000UL;
 
     /* Initialize ring buffer  */
     ring_buf->head = 0;
@@ -212,23 +194,7 @@ void usart_init(uint8 usart_num, uint32 baud) {
  *  @sideeffect Turns off the specified USART
  */
 void usart_disable(uint8 usart_num) {
-    ASSERT((usart_num <= NR_USARTS) && (usart_num > 0));
-    usart_port *port;
-
-    switch (usart_num) {
-    case 1:
-        port = (usart_port*)USART1_BASE;
-        break;
-    case 2:
-        port = (usart_port*)USART2_BASE;
-        break;
-    case 3:
-        port = (usart_port*)USART3_BASE;
-        break;
-    default:
-        /* should never get here  */
-        ASSERT(0);
-    }
+    usart_port *port = usart_dev_table[usart_num].base;
 
     /* Is this usart enabled?  */
     if (!(port->SR & USART_UE))
@@ -253,7 +219,6 @@ void usart_disable(uint8 usart_num) {
  *  @param[in] str String to send
  */
 void usart_putstr(uint8 usart_num, const char* str) {
-    ASSERT((usart_num <= NR_USARTS) && (usart_num > 0));
     char ch;
 
     while((ch = *(str++)) != '\0') {
@@ -268,7 +233,6 @@ void usart_putstr(uint8 usart_num, const char* str) {
  *  @param[in] val number to print
  */
 void usart_putudec(uint8 usart_num, uint32 val) {
-    ASSERT((usart_num <= NR_USARTS) && (usart_num > 0));
     char digits[12];
     int i;
 
@@ -294,23 +258,10 @@ void usart_putudec(uint8 usart_num, uint32 val) {
  *
  *  @sideeffect may update the head pointer of the recv buffer
  */
+
 uint8 usart_getc(uint8 usart_num) {
     uint8 ch;
-    usart_ring_buf *rb;
-
-    switch (usart_num) {
-    case 1:
-        rb = &ring_buf1;
-        break;
-    case 2:
-        rb = &ring_buf2;
-        break;
-    case 3:
-        rb = &ring_buf3;
-        break;
-    default:
-        ASSERT(0);
-    }
+    usart_ring_buf *rb = usart_dev_table[usart_num].buf;
 
     /* Make sure there's actually data to be read  */
     ASSERT(rb->head != rb->tail);
@@ -323,45 +274,16 @@ uint8 usart_getc(uint8 usart_num) {
 }
 
 uint32 usart_data_available(uint8 usart_num) {
-    usart_ring_buf *rb;
-
-    switch (usart_num) {
-    case 1:
-        rb = &ring_buf1;
-        break;
-    case 2:
-        rb = &ring_buf2;
-        break;
-    case 3:
-        rb = &ring_buf3;
-        break;
-    default:
-        ASSERT(0);
-    }
+    usart_ring_buf *rb = usart_dev_table[usart_num].buf;
 
     return rb->tail - rb->head;
 }
 
 void usart_clear_buffer(uint8 usart_num) {
-    usart_ring_buf *rb;
-
-    switch (usart_num) {
-    case 1:
-        rb = &ring_buf1;
-        break;
-    case 2:
-        rb = &ring_buf2;
-        break;
-    case 3:
-        rb = &ring_buf3;
-        break;
-    default:
-        ASSERT(0);
-    }
+    usart_ring_buf *rb = usart_dev_table[usart_num].buf;
 
     rb->tail = rb->head;
 }
-
 
 
 /**
@@ -372,27 +294,7 @@ void usart_clear_buffer(uint8 usart_num) {
  *
  */
 void usart_putc(uint8 usart_num, uint8 byte) {
-    ASSERT((usart_num <= NR_USARTS) && (usart_num > 0));
-    usart_port *port;
-
-    switch (usart_num) {
-    case 1:
-        port = (usart_port*)USART1_BASE;
-        break;
-    case 2:
-        port = (usart_port*)USART2_BASE;
-        break;
-    case 3:
-        port = (usart_port*)USART3_BASE;
-        break;
-    default:
-        /* Should never get here  */
-        ASSERT(0);
-    }
-
-//    if (ch == '\n') {
-//        usart_putc(usart_num, '\r');
-//    }
+    usart_port *port = usart_dev_table[usart_num].base;
 
     port->DR = byte;
 
