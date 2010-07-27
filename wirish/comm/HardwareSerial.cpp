@@ -34,21 +34,6 @@
 #include "gpio.h"
 #include "timers.h"
 
-#define USART1_TX_PORT             GPIOA_BASE
-#define USART1_TX_PIN              9
-#define USART1_RX_PORT             GPIOA_BASE
-#define USART1_RX_PIN              10
-
-#define USART2_TX_PORT             GPIOA_BASE
-#define USART2_TX_PIN              2
-#define USART2_RX_PORT             GPIOA_BASE
-#define USART2_RX_PIN              3
-
-#define USART3_TX_PORT             GPIOB_BASE
-#define USART3_TX_PIN              10
-#define USART3_RX_PORT             GPIOB_BASE
-#define USART3_RX_PIN              11
-
 HardwareSerial::HardwareSerial(uint8 usart_num,
                                uint32 max_baud,
                                GPIO_Port *gpio_port,

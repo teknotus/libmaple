@@ -42,60 +42,18 @@
 #define USART2_BASE         0x40004400
 #define USART3_BASE         0x40004800
 
-#define USART_UE            BIT(13)
-#define USART_M             BIT(12)
-#define USART_TE            BIT(3)
-#define USART_RE            BIT(2)
-#define USART_RXNEIE        BIT(5)       // read data register not empty interrupt enable
-#define USART_TXE           BIT(7)
-#define USART_TC            BIT(6)
-
-#define USART_STOP_BITS_1   BIT_MASK_SHIFT(0b0, 12)
-#define USART_STOP_BITS_05  BIT_MASK_SHIFT(0b01, 12)
-#define USART_STOP_BITS_2   BIT_MASK_SHIFT(0b02, 12)
-#define USART_STOP_BITS_15  BIT_MASK_SHIFT(0b02, 12)
-
-#define USART1_CLK          72000000UL
-#define USART2_CLK          36000000UL
-#define USART3_CLK          36000000UL
-
-#define USART_RECV_BUF_SIZE 64
-
-#define NR_USARTS 3
-
-typedef struct usart_port {
-    volatile uint32 SR;       // Status register
-    volatile uint32 DR;       // Data register
-    volatile uint32 BRR;      // Baud rate register
-    volatile uint32 CR1;      // Control register 1
-    volatile uint32 CR2;      // Control register 2
-    volatile uint32 CR3;      // Control register 3
-    volatile uint32 GTPR;     // Guard time and prescaler register
-} usart_port;
-
 /* Ring buffer notes:
  * The buffer is empty when head == tail.
  * The buffer is full when the head is one byte in front of the tail
  * The total buffer size must be a power of two
  * Note, one byte is necessarily left free with this scheme */
-typedef struct usart_ring_buf {
-    uint32 head;
-    uint32 tail;
-    uint8 buf[USART_RECV_BUF_SIZE];
-} usart_ring_buf;
+static ring_buffer ring_buf1;
+static ring_buffer ring_buf2;
+static ring_buffer ring_buf3;
 
-static usart_ring_buf ring_buf1;
-static usart_ring_buf ring_buf2;
-static usart_ring_buf ring_buf3;
+static uint8 buf[64];
 
-struct usart_dev {
-   usart_port *base;
-   usart_ring_buf *buf;
-   const uint8 rcc_dev_num;
-   const uint8 nvic_dev_num;
-};
-
-static const struct usart_dev usart_dev_table[] = {
+const struct usart_dev usart_dev_table[] = {
    [USART1] = {
       .base = (usart_port*)USART1_BASE,
       .buf = &ring_buf1,
@@ -118,21 +76,22 @@ static const struct usart_dev usart_dev_table[] = {
 
 void USART1_IRQHandler(void) {
     /* Read the data  */
-    ring_buf1.buf[ring_buf1.tail++] = (uint8)(((usart_port*)(USART1_BASE))->DR);
-    ring_buf1.tail %= USART_RECV_BUF_SIZE;
+//    ring_buf1.buf[ring_buf1.tail++] = (uint8)(((usart_port*)(USART1_BASE))->DR);
+//    ring_buf1.tail %= USART_RECV_BUF_SIZE;
 }
 
 /* Don't overrun your buffer, seriously  */
 void USART2_IRQHandler(void) {
     /* Read the data  */
-    ring_buf2.buf[ring_buf2.tail++] = (uint8)(((usart_port*)(USART2_BASE))->DR);
-    ring_buf2.tail %= USART_RECV_BUF_SIZE;
+//    ring_buf2.buf[ring_buf2.tail++] = (uint8)(((usart_port*)(USART2_BASE))->DR);
+//    ring_buf2.tail %= USART_RECV_BUF_SIZE;
 }
 /* Don't overrun your buffer, seriously  */
 void USART3_IRQHandler(void) {
     /* Read the data  */
-    ring_buf3.buf[ring_buf3.tail++] = (uint8)(((usart_port*)(USART3_BASE))->DR);
-    ring_buf3.tail %= USART_RECV_BUF_SIZE;
+//    ring_buf3.buf[ring_buf3.tail++] = (uint8)(((usart_port*)(USART3_BASE))->DR);
+//    ring_buf3.tail %= USART_RECV_BUF_SIZE;
+    rb_insert(usart_dev_table[USART3].buf,(uint8)(((usart_port*)(USART3_BASE))->DR));
 }
 
 /**
@@ -148,7 +107,7 @@ void USART3_IRQHandler(void) {
  */
 void usart_init(uint8 usart_num, uint32 baud) {
     usart_port *port;
-    usart_ring_buf *ring_buf;
+    ring_buffer *ring_buf;
 
     uint32 clk_speed;
     uint32 integer_part;
@@ -166,6 +125,8 @@ void usart_init(uint8 usart_num, uint32 baud) {
     /* Initialize ring buffer  */
     ring_buf->head = 0;
     ring_buf->tail = 0;
+    ring_buf->size = 64;
+    ring_buf->buf = buf;
 
     /* Set baud rate  */
     integer_part = ((25 * clk_speed) / (4 * baud));
@@ -248,59 +209,5 @@ void usart_putudec(uint8 usart_num, uint32 val) {
 }
 
 
-/**
- *  @brief Return one character from the receive buffer. Assumes
- *  that there is data available.
- *
- *  @param[in] usart_num number of the usart to read from
- *
- *  @return character from ring buffer
- *
- *  @sideeffect may update the head pointer of the recv buffer
- */
-
-uint8 usart_getc(uint8 usart_num) {
-    uint8 ch;
-    usart_ring_buf *rb = usart_dev_table[usart_num].buf;
-
-    /* Make sure there's actually data to be read  */
-    ASSERT(rb->head != rb->tail);
-
-    /* Read the data and check for wraparound  */
-    ch = rb->buf[rb->head++];
-    rb->head %= USART_RECV_BUF_SIZE;
-
-    return ch;
-}
-
-uint32 usart_data_available(uint8 usart_num) {
-    usart_ring_buf *rb = usart_dev_table[usart_num].buf;
-
-    return rb->tail - rb->head;
-}
-
-void usart_clear_buffer(uint8 usart_num) {
-    usart_ring_buf *rb = usart_dev_table[usart_num].buf;
-
-    rb->tail = rb->head;
-}
-
-
-/**
- *  @brief Output a byte out the uart
- *
- *  @param[in] usart_num usart number to output on
- *  @param[in] byte byte to send
- *
- */
-void usart_putc(uint8 usart_num, uint8 byte) {
-    usart_port *port = usart_dev_table[usart_num].base;
-
-    port->DR = byte;
-
-    /* Wait for transmission to complete  */
-    while ((port->SR & USART_TXE) == 0)
-        ;
-}
 
 

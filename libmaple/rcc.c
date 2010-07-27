@@ -136,9 +136,11 @@ void rcc_set_adc_prescaler(uint32 divider) {
    __write(RCC_CFGR, cfgr | PCLK2_DIV_2);
 }
 
-#define APB1 0
-#define APB2 1
-#define AHB  2
+enum {
+   APB1,
+   APB2,
+   AHB
+};
 
 struct rcc_dev_info {
    const uint8 clk_domain;
