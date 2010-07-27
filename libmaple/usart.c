@@ -42,33 +42,21 @@
 #define USART2_BASE         0x40004400
 #define USART3_BASE         0x40004800
 
-/* Ring buffer notes:
- * The buffer is empty when head == tail.
- * The buffer is full when the head is one byte in front of the tail
- * The total buffer size must be a power of two
- * Note, one byte is necessarily left free with this scheme */
-static ring_buffer ring_buf1;
-static ring_buffer ring_buf2;
-static ring_buffer ring_buf3;
-
 static uint8 buf[64];
 
-const struct usart_dev usart_dev_table[] = {
+struct usart_dev usart_dev_table[] = {
    [USART1] = {
       .base = (usart_port*)USART1_BASE,
-      .buf = &ring_buf1,
       .rcc_dev_num = RCC_USART1,
       .nvic_dev_num = NVIC_USART1
    },
    [USART2] = {
       .base = (usart_port*)USART2_BASE,
-      .buf = &ring_buf2,
       .rcc_dev_num = RCC_USART2,
       .nvic_dev_num = NVIC_USART2
    },
    [USART3] = {
       .base = (usart_port*)USART3_BASE,
-      .buf = &ring_buf3,
       .rcc_dev_num = RCC_USART3,
       .nvic_dev_num = NVIC_USART3
    },
@@ -91,7 +79,7 @@ void USART3_IRQHandler(void) {
     /* Read the data  */
 //    ring_buf3.buf[ring_buf3.tail++] = (uint8)(((usart_port*)(USART3_BASE))->DR);
 //    ring_buf3.tail %= USART_RECV_BUF_SIZE;
-    rb_insert(usart_dev_table[USART3].buf,(uint8)(((usart_port*)(USART3_BASE))->DR));
+    rb_insert(&usart_dev_table[USART3].rb,(uint8)(((usart_port*)(USART3_BASE))->DR));
 }
 
 /**
@@ -108,6 +96,7 @@ void USART3_IRQHandler(void) {
 void usart_init(uint8 usart_num, uint32 baud) {
     usart_port *port;
     ring_buffer *ring_buf;
+    uint8 *buf;
 
     uint32 clk_speed;
     uint32 integer_part;
@@ -115,7 +104,6 @@ void usart_init(uint8 usart_num, uint32 baud) {
     uint32 tmp;
 
     port = usart_dev_table[usart_num].base;
-    ring_buf = usart_dev_table[usart_num].buf;
     rcc_enable_device(usart_dev_table[usart_num].rcc_dev_num);
     nvic_enable_interrupt(usart_dev_table[usart_num].nvic_dev_num);
 
@@ -123,10 +111,7 @@ void usart_init(uint8 usart_num, uint32 baud) {
     clk_speed = (usart_num == USART1) ? 72000000UL : 36000000UL;
 
     /* Initialize ring buffer  */
-    ring_buf->head = 0;
-    ring_buf->tail = 0;
-    ring_buf->size = 64;
-    ring_buf->buf = buf;
+    rb_init(&usart_dev_table[usart_num].rb, 64, buf);
 
     /* Set baud rate  */
     integer_part = ((25 * clk_speed) / (4 * baud));
@@ -156,10 +141,6 @@ void usart_init(uint8 usart_num, uint32 baud) {
  */
 void usart_disable(uint8 usart_num) {
     usart_port *port = usart_dev_table[usart_num].base;
-
-    /* Is this usart enabled?  */
-    if (!(port->SR & USART_UE))
-        return;
 
     /* TC bit must be high before disabling the usart  */
     while ((port->SR & USART_TC) == 0)
@@ -205,7 +186,6 @@ void usart_putudec(uint8 usart_num, uint32 val) {
     while (--i >= 0) {
         usart_putc(usart_num, digits[i]);
     }
-
 }
 
 

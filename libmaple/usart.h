@@ -70,21 +70,14 @@ typedef struct usart_port {
     volatile uint32 GTPR;     // Guard time and prescaler register
 } usart_port;
 
-//typedef struct usart_ring_buf {
-//    uint32 head;
-//    uint32 tail;
-//    uint8 buf[USART_RECV_BUF_SIZE];
-//} usart_ring_buf;
-
-
 struct usart_dev {
    usart_port *base;
-   ring_buffer *buf;
+   ring_buffer rb;
    const uint8 rcc_dev_num;
    const uint8 nvic_dev_num;
 };
 
-extern const struct usart_dev usart_dev_table[];
+extern struct usart_dev usart_dev_table[];
 
 static inline void usart_putc(uint8 usart_num, uint8 byte) {
     usart_port *port = usart_dev_table[usart_num].base;
@@ -97,15 +90,15 @@ static inline void usart_putc(uint8 usart_num, uint8 byte) {
 }
 
 static inline uint8 usart_getc(uint8 usart_num) {
-    return rb_remove(usart_dev_table[usart_num].buf);
+    return rb_remove(&usart_dev_table[usart_num].rb);
 }
 
 static inline uint32 usart_data_available(uint8 usart_num) {
-    return rb_full_count(usart_dev_table[usart_num].buf);
+    return rb_full_count(&usart_dev_table[usart_num].rb);
 }
 
 static inline void usart_clear_buffer(uint8 usart_num) {
-    rb_reset(usart_dev_table[usart_num].buf);
+    rb_reset(&usart_dev_table[usart_num].rb);
 }
 
 
