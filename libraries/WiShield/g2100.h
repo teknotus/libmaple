@@ -281,7 +281,6 @@ typedef struct
 
 void zg_init();
 void zg_reset();
-void spi_transfer(volatile U8* buf, U16 len, U8 toggle_cs);
 void zg_chip_reset();
 void zg_interrupt2_reg();
 void zg_interrupt_reg(U8 mask, U8 state);

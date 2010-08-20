@@ -37,8 +37,11 @@
 #include "witypes.h"
 #include "config.h"
 #include "g2100.h"
-#include "spi.h"
 #include "global-conf.h"
+
+#include "libmaple.h"
+#include "spi.h"
+#include "gpio.h"
 
 static U8 mac[6];
 static U8 zg_conn_status;
@@ -55,14 +58,15 @@ static U16 zg_buf_len;
 
 static U8 wpa_psk_key[32];
 
+#define CS_PORT GPIOA_BASE
+#define CS_PIN  10
+
 void zg_init()
 {
-	U8 clr;
-
         /* initialize the spi  */
 //	ZG2100_SpiInit();
-//	clr = SPSR;
-//	clr = SPDR;
+   gpio_set_mode(CS_PORT, CS_PIN, GPIO_MODE_OUTPUT_PP);
+   spi_init(1, SPI_PRESCALE_32, SPI_MSBFIRST, 0);
 
 	intr_occured = 0;
 	intr_valid = 0;
@@ -88,14 +92,18 @@ void spi_transfer(volatile U8* buf, U16 len, U8 toggle_cs)
 	U16 i;
 
 //	ZG2100_CSoff();
+        gpio_write_bit(CS_PORT, CS_PIN, 0);
 
 	for (i = 0; i < len; i++) {
+           buf[i] = spi_tx_byte(1, buf[i]);
 //		ZG2100_SpiSendData(buf[i]);		// Start the transmission
 //		buf[i] = ZG2100_SpiRecvData();
 	}
 
-	if (toggle_cs)
+	if (toggle_cs) {
 //		ZG2100_CSon();
+           gpio_write_bit(CS_PORT, CS_PIN, 1);
+        }
 
 	return;
 }
