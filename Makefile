@@ -44,6 +44,7 @@ endif
 # Set all submodules here
 LIBMAPLE_MODULES := libmaple
 LIBMAPLE_MODULES += wirish
+LIBMAPLE_MODULES += libraries/WiShield
 
 # call each module rules.mk
 $(foreach m,$(LIBMAPLE_MODULES),$(eval $(call LIBMAPLE_MODULE_template,$(m))))

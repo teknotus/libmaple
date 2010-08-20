@@ -34,7 +34,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <avr/io.h>
+//#include <avr/io.h>
 
 #include "timer.h"
 #include "global-conf.h"

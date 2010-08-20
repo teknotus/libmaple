@@ -50,8 +50,9 @@ void WiShield::init()
 {
 	zg_init();
 
+        /* how to interrupt?  */
 #ifdef USE_DIG0_INTR
-	attachInterrupt(0, zg_isr, LOW);
+//	attachInterrupt(0, zg_isr, LOW);
 #endif
 
 #ifdef USE_DIG8_INTR

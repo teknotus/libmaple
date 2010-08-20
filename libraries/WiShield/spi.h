@@ -57,6 +57,7 @@
 #define ZG2100_ISR_SET(X)		(PCMSK0 = X)
 #endif
 
+#if 0
 //AVR Mega168 SPI HAL
 #define BIT0							0x01
 #define BIT1							0x02
@@ -163,5 +164,6 @@
 #define LED0_toggle()	((LED0_PORT & LED0_BIT)?(LED0_PORT &= ~LED0_BIT):(LED0_PORT |= LED0_BIT))
 #define LED1_toggle()	((LED0_PORT & LED1_BIT)?(LED0_PORT &= ~LED1_BIT):(LED0_PORT |= LED1_BIT))
 #define LED3_toggle()	((LED0_PORT & LED3_BIT)?(LED0_PORT &= ~LED3_BIT):(LED0_PORT |= LED3_BIT))
+#endif
 
 #endif /* SPI_H_ */

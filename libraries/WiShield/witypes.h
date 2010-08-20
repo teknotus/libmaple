@@ -36,7 +36,7 @@
 #ifndef WITYPES_H_
 #define WITYPES_H_
 
-#include <avr/pgmspace.h>
+//#include <avr/pgmspace.h>
 
 #ifndef NULL
 #define NULL		((void *) 0)
@@ -47,26 +47,22 @@
 typedef unsigned int size_t;
 #endif
 
-typedef char int8;
-typedef volatile char vint8;
-typedef unsigned char uint8;
-typedef volatile unsigned char vuint8;
-typedef int int16;
-typedef volatile int vint16;
-typedef unsigned int uint16;
-typedef volatile unsigned int vuint16;
-typedef long int32;
-typedef volatile long vint32;
-typedef unsigned long uint32;
-typedef volatile unsigned long vuint32;
+typedef volatile char           vint8;
+typedef volatile unsigned char  vuint8;
 
-typedef unsigned char u8;
-typedef unsigned char U8;
-typedef unsigned int u16;
-typedef unsigned int U16;
-typedef unsigned long u32;
-typedef unsigned long U32;
+typedef volatile short          vint16;
+typedef volatile unsigned short vuint16;
 
-typedef uint8_t boolean;
+typedef volatile int            vint32;
+typedef volatile unsigned int   vuint32;
+
+typedef unsigned char           u8;
+typedef unsigned char           U8;
+typedef unsigned short          u16;
+typedef unsigned short          U16;
+typedef unsigned int            u32;
+typedef unsigned int            U32;
+
+typedef unsigned char           boolean;
 
 #endif /* WITYPES_H_ */

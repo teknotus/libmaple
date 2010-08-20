@@ -36,12 +36,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include <avr/sfr_defs.h>
+//#include <avr/interrupt.h>
+//#include <avr/io.h>
+//#include <avr/sfr_defs.h>
 
 #include "clock-arch.h"
-#include "wiring.h"
+#include "wirish.h"
 
 #if 0
 //Counted time

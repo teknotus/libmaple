@@ -59,9 +59,10 @@ void zg_init()
 {
 	U8 clr;
 
-	ZG2100_SpiInit();
-	clr = SPSR;
-	clr = SPDR;
+        /* initialize the spi  */
+//	ZG2100_SpiInit();
+//	clr = SPSR;
+//	clr = SPDR;
 
 	intr_occured = 0;
 	intr_valid = 0;
@@ -86,15 +87,15 @@ void spi_transfer(volatile U8* buf, U16 len, U8 toggle_cs)
 {
 	U16 i;
 
-	ZG2100_CSoff();
+//	ZG2100_CSoff();
 
 	for (i = 0; i < len; i++) {
-		ZG2100_SpiSendData(buf[i]);		// Start the transmission
-		buf[i] = ZG2100_SpiRecvData();
+//		ZG2100_SpiSendData(buf[i]);		// Start the transmission
+//		buf[i] = ZG2100_SpiRecvData();
 	}
 
 	if (toggle_cs)
-		ZG2100_CSon();
+//		ZG2100_CSon();
 
 	return;
 }
@@ -177,7 +178,7 @@ void zg_interrupt_reg(U8 mask, U8 state)
 
 void zg_isr()
 {
-	ZG2100_ISR_DISABLE();
+//	ZG2100_ISR_DISABLE();
 	intr_occured = 1;
 }
 
@@ -251,16 +252,16 @@ void zg_process_isr()
 	} while (intr_state);
 #ifdef USE_DIG8_INTR
 	// PCINT0 supports only edge triggered INT
-	if (PORTB & 0x01) {
-		intr_occured = 0;
-		ZG2100_ISR_ENABLE();
-	}
-	else {
-		intr_occured = 1;
-	}
+//	if (PORTB & 0x01) {
+//		intr_occured = 0;
+//		ZG2100_ISR_ENABLE();
+//	}
+//	else {
+//		intr_occured = 1;
+//	}
 #else
 	intr_occured = 0;
-	ZG2100_ISR_ENABLE();
+//	ZG2100_ISR_ENABLE();
 #endif
 }
 
@@ -421,7 +422,7 @@ void zg_drv_process()
 					zg_drv_state = DRV_STATE_START_CONN;
 					break;
 				case ZG_MAC_SUBTYPE_MGMT_REQ_CONNECT:
-					LEDConn_on();
+//					LEDConn_on();
 					zg_conn_status = 1;	// connected
 					break;
 				default:
@@ -436,7 +437,7 @@ void zg_drv_process()
 			switch (zg_buf[2]) {
 			case ZG_MAC_SUBTYPE_MGMT_IND_DISASSOC:
 			case ZG_MAC_SUBTYPE_MGMT_IND_DEAUTH:
-				LEDConn_off();
+//				LEDConn_off();
 				zg_conn_status = 0;	// lost connection
 
 				//try to reconnect
@@ -447,11 +448,11 @@ void zg_drv_process()
 					U16 status = (((U16)(zg_buf[3]))<<8)|zg_buf[4];
 
 					if (status == 1 || status == 5) {
-						LEDConn_off();
+//						LEDConn_off();
 						zg_conn_status = 0;	// not connected
 					}
 					else if (status == 2 || status == 6) {
-						LEDConn_on();
+//						LEDConn_on();
 						zg_conn_status = 1;	// connected
 					}
 				}
