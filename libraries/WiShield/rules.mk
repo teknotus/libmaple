@@ -21,7 +21,8 @@ cSRCS_$(d) :=   network.c                      \
                 g2100.c                        \
                 uip_arp.c                      \
                 stack.c                        \
-                uip.c
+                uip.c                          \
+                webserver.c
 
 #                 examples/UDPApp/udpapp.c       \
 #                 examples/SocketApp/socketapp.c \
