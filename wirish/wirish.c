@@ -58,7 +58,7 @@ void init(void) {
    adc_init();
    timer_init(1, 1);
    timer_init(2, 1);
-   timer_init(3, 1);
+//   timer_init(3, 1);
    timer_init(4, 1);
    setupUSB();
 }
