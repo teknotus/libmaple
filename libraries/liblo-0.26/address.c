@@ -26,14 +26,6 @@
 #include <unistd.h>
 #endif
 
-#ifdef WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <netdb.h>
-#include <sys/socket.h>
-#endif
-
 #include "lo_types_internal.h"
 #include "lo/lo.h"
 #include "config.h"
@@ -41,7 +33,7 @@
 lo_address lo_address_new_with_proto(int proto, const char *host, const char *port)
 {
     lo_address a;
-    
+
     if(proto != LO_UDP && proto != LO_TCP && proto != LO_UNIX) return NULL;
 
     a = calloc(1, sizeof(struct _lo_address));
@@ -149,7 +141,7 @@ static const char* get_protocol_name(int proto)
 	    return "udp";
 	case LO_TCP:
 	    return "tcp";
-#ifndef WIN32 
+#ifndef WIN32
 	case LO_UNIX:
 	    return "unix";
 #endif
@@ -171,7 +163,7 @@ char *lo_address_get_url(lo_address a)
 	fmt = "osc.%s://%s:%s/";
     }
 #ifndef _MSC_VER
-    ret = snprintf(NULL, 0, fmt, 
+    ret = snprintf(NULL, 0, fmt,
 	    get_protocol_name(a->protocol), a->host, a->port);
 #endif
     if (ret <= 0) {
@@ -230,7 +222,7 @@ char *lo_url_get_protocol(const char *url)
     }
 
     protocol = malloc(strlen(url));
-    
+
     if (sscanf(url, "osc://%s", protocol)) {
 	fprintf(stderr, PACKAGE_NAME " warning: no protocol specified in URL, "
 		"assuming UDP.\n");

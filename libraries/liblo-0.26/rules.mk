@@ -5,7 +5,7 @@ d               := $(dir)
 BUILDDIRS       += $(BUILD_PATH)/$(d)
 
 
-CFLAGS_$(d) := $(WIRISH_INCLUDES) $(LIBMAPLE_INCLUDES)
+CFLAGS_$(d) := $(WIRISH_INCLUDES) $(LIBMAPLE_INCLUDES) -I$(d)
 
 cSRCS_$(d) :=   address.c \
 		blob.c \

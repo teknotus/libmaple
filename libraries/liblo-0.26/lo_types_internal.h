@@ -13,12 +13,7 @@
 #include <poll.h>
 #endif
 
-#ifdef WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <netdb.h>
-#endif
+#include <sys/types.h>
 
 #ifdef _MSC_VER
 typedef SSIZE_T ssize_t;
@@ -28,7 +23,12 @@ typedef __int64 int64_t;
 typedef __int32 int32_t;
 #endif
 
-#include <pthread.h>
+typedef int pthread_t;
+typedef int socklen_t;
+
+typedef struct sockaddr_storage {
+
+} sockaddr_storage;
 
 #include "lo/lo_osc_types.h"
 
@@ -123,7 +123,7 @@ typedef union {
     char     c;
     uint32_t nl;
 } lo_pcast32;
-    
+
 typedef union {
     int64_t    i;
     double     f;
@@ -135,5 +135,5 @@ extern struct lo_cs {
 	int udp;
 	int tcp;
 } lo_client_sockets;
-	
+
 #endif

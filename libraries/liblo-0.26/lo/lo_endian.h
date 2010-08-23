@@ -20,13 +20,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-#ifdef WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <netinet/in.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

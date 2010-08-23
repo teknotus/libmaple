@@ -22,7 +22,6 @@ lo_timetag lo_get_tt_immediate() { lo_timetag tt = {0U,1U}; return tt; }
 #else
 #include <sys/time.h>
 #endif
-#include <time.h>
 
 #define JAN_1970 0x83aa7e80      /* 2208988800 1970 - 1900 in seconds */
 
@@ -35,14 +34,14 @@ double lo_timetag_diff(lo_timetag a, lo_timetag b)
 void lo_timetag_now(lo_timetag *t)
 {
 #ifdef WIN32
-    /* 
+    /*
         FILETIME is the time in units of 100 nsecs from 1601-Jan-01
         1601 and 1900 are 9435484800 seconds apart.
     */
     FILETIME ftime;
     double dtime;
     GetSystemTimeAsFileTime(&ftime);
-    dtime = 
+    dtime =
         ((ftime.dwHighDateTime*4294967296.e-7)-9435484800.)+
         (ftime.dwLowDateTime*1.e-7);
 

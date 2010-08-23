@@ -2,6 +2,7 @@
 
 BOARD ?= maple
 MAPLE_TARGET ?= flash
+V = 1
 
 # Useful paths
 SRCROOT := $(dir)
@@ -45,6 +46,7 @@ endif
 LIBMAPLE_MODULES := libmaple
 LIBMAPLE_MODULES += wirish
 LIBMAPLE_MODULES += libraries/WiShield
+LIBMAPLE_MODULES += libraries/liblo-0.26
 
 # call each module rules.mk
 $(foreach m,$(LIBMAPLE_MODULES),$(eval $(call LIBMAPLE_MODULE_template,$(m))))
