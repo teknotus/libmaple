@@ -37,24 +37,16 @@ unsigned char security_passphrase_len;
 
 void setup()
 {
-   /* CS  */
-   pinMode(10, OUTPUT);
-   digitalWrite(10, HIGH);
-
-   Serial2.begin(115200);
-   iprintf("hello world!\n");
+pinMode(10, OUTPUT);
+digitalWrite(10, HIGH);
+Serial2.begin(115200);
    WiFi.init();
 }
 
-// This is the webpage that is served up by the webserver
-const char webpage[]= {"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<center><h1>Hello World!! I am WiShield</h1><form method=\"get\" action=\"0\">Toggle LED:<input type=\"submit\" name=\"0\" value=\"LED1\"></input></form></center>"};
-
-byte buf[] = "Hello world!";
 void loop()
 {
    WiFi.run();
 }
-
 
 // Force init to be called *first*, i.e. before static object allocation.
 // Otherwise, statically allocated object that need libmaple may fail.
