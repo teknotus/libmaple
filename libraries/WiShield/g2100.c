@@ -42,6 +42,7 @@ Description:	Driver for the ZeroG Wireless G2100 series devices
 #include "libmaple.h"
 #include "spi.h"
 #include "gpio.h"
+#include "nvic.h"
 
 #define ZG2100_SPI_DBG 0
 #define ZG2100_DBG 0
@@ -203,6 +204,7 @@ void zg_interrupt_reg(U8 mask, U8 state)
 void zg_isr()
 {
    //	ZG2100_ISR_DISABLE();
+//   nvic_globalirq_disable();
    intr_occured = 1;
 }
 
@@ -274,6 +276,7 @@ void zg_process_isr()
          }
       }
    } while (intr_state);
+//   nvic_globalirq_enable();
    intr_occured = 0;
 }
 

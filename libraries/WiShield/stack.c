@@ -161,5 +161,6 @@ void stack_process(void)
 
 void uip_log(char *m)
 {
+   iprintf("%s\n", m);
    //TODO: Get debug information out here somehow, does anybody know a smart way to do that?
 }

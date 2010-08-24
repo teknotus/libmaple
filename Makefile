@@ -47,6 +47,7 @@ LIBMAPLE_MODULES := libmaple
 LIBMAPLE_MODULES += wirish
 LIBMAPLE_MODULES += libraries/WiShield
 LIBMAPLE_MODULES += libraries/liblo-0.26
+LIBMAPLE_MODULES += lumen
 
 # call each module rules.mk
 $(foreach m,$(LIBMAPLE_MODULES),$(eval $(call LIBMAPLE_MODULE_template,$(m))))

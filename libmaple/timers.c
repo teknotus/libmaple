@@ -121,25 +121,25 @@ void timer_init(uint8 timer_num, uint16 prescale) {
                               // Counter disabled for now
 
     timer->PSC = prescale;    // Prescaling by prescale (duh)
-    timer->ARR = 0xFFFF;      // Max reload cont
+    timer->ARR = 0xFF;      // Max reload cont
 
     /* initialize all the channels to 50% duty cycle,
      * TODO: none of them actually get output unless the gpio pin
      * is set, this will probably consume a bit more power but
      * we'll worry about that later. */
-    timer->CCR1   = 0x8FFF;     // PWM start value
+    timer->CCR1   = 0x8F;     // PWM start value
     timer->CCMR1 |= 0x68;       // PWM mode 1, enable preload register.
     timer->CCER  |= 0x001;      // enable ch
 
-    timer->CCR2   = 0x8FFF;     // PWM start value
+    timer->CCR2   = 0x8F;     // PWM start value
     timer->CCMR1 |= (0x68 << 8);// PWM mode 1, enable preload register.
     timer->CCER  |= 0x010;      // enable ch
 
-    timer->CCR3   = 0x8FFF;     // PWM start value
+    timer->CCR3   = 0x8F;     // PWM start value
     timer->CCMR2 |= 0x68;       // PWM mode 1, enable preload register.
     timer->CCER  |= 0x100;      // enable ch
 
-    timer->CCR4   = 0x8FFF;     // PWM start value
+    timer->CCR4   = 0x8F;     // PWM start value
     timer->CCMR2 |= (0x68 << 8);// PWM mode 1, enable preload register.
     timer->CCER  |= 0x1000;      // enable ch
 

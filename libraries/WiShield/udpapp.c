@@ -32,16 +32,19 @@ Description:	UDP app for the WiShield 1.0
 
  *****************************************************************************/
 
+#include "libmaple.h"
+#include "gpio.h"
 #include "uip.h"
 #include <string.h>
 #include "udpapp.h"
 #include "config.h"
+#include "lumen.h"
 
 #include <lo/lo.h>
 
-#define STATE_INIT				0
+#define STATE_INIT              0
 #define STATE_LISTENING         1
-#define STATE_QUIT	2
+#define STATE_QUIT              2
 
 static struct udpapp_state s;
 
@@ -49,14 +52,17 @@ void dummy_app_appcall(void)
 {
 }
 
+struct uip_udp_conn *test_conn;
+
 void udpapp_init(void)
 {
    uip_ipaddr_t addr;
    struct uip_udp_conn *c;
 
-   uip_ipaddr(&addr, 192,168,1,125);
-   c = uip_udp_new(&addr, HTONS(12345));
+   uip_ipaddr(&addr, 255, 255, 255, 255);
+   c = uip_udp_new(&addr, HTONS(0));
    if(c != NULL) {
+      test_conn = c;
       uip_udp_bind(c, HTONS(12344));
    }
 
@@ -69,18 +75,49 @@ static void set_light_rgb(unsigned char r, unsigned char g, unsigned char b) {
     // TODO
 }
 
+typedef struct {
+   const char *path;
+   float r;
+   float g;
+   float b;
+} LibloPacket __attribute__ ((packed));
+
 static unsigned char parse_msg(void)
 {
     int i;
+    LibloPacket *p;
     int bytes_available = uip_datalen();
+    int argc;
+    lo_arg **argv;
 
     // TODO Parse OSC message
 
+    gpio_write_bit(GPIOA_BASE, 1, 1);
+    gpio_write_bit(GPIOA_BASE, 1, 0);
+
     unsigned char* pData = uip_appdata;
+    p = uip_appdata;
+
+//    iprintf("uip_datalen: %u pData[0] = %x str: %s\n", bytes_available, pData[0], pData);
+//    printf("uip_datalen: %u path = %s (%f, %f, %f)\n",
+//            bytes_available,
+//            p->path,
+//            0,
+//            0,
+//            0);
 
     int result = 0;
     lo_message message = lo_message_deserialise(uip_appdata, bytes_available, &result);
 
+//    printf("argc: %u argv[0] = %f\n",
+//           lo_message_get_argc(message),
+//           lo_message_get_argv(message)[0]->f);
+
+    lumen_set_rgb(lo_message_get_argv(message)[0]->f,
+                  lo_message_get_argv(message)[1]->f,
+                  lo_message_get_argv(message)[2]->f);
+
+    lo_message_free(message);
 
     /* unsigned char checksum = 0; */
     /* for (i = 0; i < 4; ++i) { */
@@ -103,7 +140,7 @@ static unsigned char parse_msg(void)
     /*         break; */
     /* } */
 
-    return 0;
+    return 1;
 }
 
 static PT_THREAD(handle_connection(void))
