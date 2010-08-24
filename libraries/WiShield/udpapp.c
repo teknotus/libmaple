@@ -78,26 +78,30 @@ static unsigned char parse_msg(void)
 
     unsigned char* pData = uip_appdata;
 
-    unsigned char checksum = 0;
-    for (i = 0; i < 4; ++i) {
-        checksum += pData[i];
-    }
-    if (checksum != pData[4]) {
-        // Checksum doesn't match
-    }
+    int result = 0;
+    lo_message message = lo_message_deserialise(uip_appdata, bytes_available, &result);
 
-    char r, g, b;
-    switch(pData[0]) {
-        case 'S':
-            r = pData[1];
-            g = pData[2];
-            b = pData[3];
-            set_light_rgb(r,g,b);
-            break;
-        case 'Q':
-            // quit
-            break;
-    }
+
+    /* unsigned char checksum = 0; */
+    /* for (i = 0; i < 4; ++i) { */
+    /*     checksum += pData[i]; */
+    /* } */
+    /* if (checksum != pData[4]) { */
+    /*     // Checksum doesn't match */
+    /* } */
+
+    /* char r, g, b; */
+    /* switch(pData[0]) { */
+    /*     case 'S': */
+    /*         r = pData[1]; */
+    /*         g = pData[2]; */
+    /*         b = pData[3]; */
+    /*         set_light_rgb(r,g,b); */
+    /*         break; */
+    /*     case 'Q': */
+    /*         // quit */
+    /*         break; */
+    /* } */
 
     return 0;
 }
