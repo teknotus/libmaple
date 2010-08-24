@@ -24,9 +24,10 @@
 extern "C" {
 #endif
 
+#if 0 // these don't exist when you don't have a network library
 #define lo_swap16(x) htons(x)
-
 #define lo_swap32(x) htonl(x)
+#endif
 
 /* These macros come from the Linux kernel */
 
