@@ -4,8 +4,9 @@ dirstack_$(sp)  := $(d)
 d               := $(dir)
 BUILDDIRS       += $(BUILD_PATH)/$(d)
 
+LIBLO_INCLUDES = -Ilibraries/liblo-0.26/
 # Local flags
-CFLAGS_$(d) := $(WIRISH_INCLUDES) $(LIBMAPLE_INCLUDES)
+CFLAGS_$(d) := $(WIRISH_INCLUDES) $(LIBMAPLE_INCLUDES) $(LIBLO_INCLUDES)
 
 # Local rules and targets
 cSRCS_$(d) :=   network.c                      \

@@ -37,6 +37,8 @@ Description:	UDP app for the WiShield 1.0
 #include "udpapp.h"
 #include "config.h"
 
+#include <lo/lo.h>
+
 #define STATE_INIT				0
 #define STATE_LISTENING         1
 #define STATE_QUIT	2
