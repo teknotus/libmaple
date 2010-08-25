@@ -51,6 +51,7 @@ extern "C" {
 #include "WiShield.h"
 
 #define INT_PIN 2
+/* pa0  */
 
 void WiShield::init()
 {

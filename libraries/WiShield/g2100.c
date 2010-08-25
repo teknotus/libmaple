@@ -203,8 +203,6 @@ void zg_interrupt_reg(U8 mask, U8 state)
 
 void zg_isr()
 {
-   //	ZG2100_ISR_DISABLE();
-//   nvic_globalirq_disable();
    intr_occured = 1;
 }
 
@@ -223,34 +221,34 @@ void zg_process_isr()
    do {
       switch(intr_state) {
       case ZG_INTR_ST_RD_INTR_REG:
-         {
-            U8 intr_val = hdr[1] & hdr[2];
+      {
+         U8 intr_val = hdr[1] & hdr[2];
 
-            if ( (intr_val & ZG_INTR_MASK_FIFO1) == ZG_INTR_MASK_FIFO1) {
-               hdr[0] = ZG_INTR_REG;
-               hdr[1] = ZG_INTR_MASK_FIFO1;
-               spi_transfer(hdr, 2, 1);
+         if ( (intr_val & ZG_INTR_MASK_FIFO1) == ZG_INTR_MASK_FIFO1) {
+            hdr[0] = ZG_INTR_REG;
+            hdr[1] = ZG_INTR_MASK_FIFO1;
+            spi_transfer(hdr, 2, 1);
 
-               intr_state = ZG_INTR_ST_WT_INTR_REG;
-               next_cmd = ZG_BYTE_COUNT_FIFO1_REG;
-            }
-            else if ( (intr_val & ZG_INTR_MASK_FIFO0) == ZG_INTR_MASK_FIFO0) {
-               hdr[0] = ZG_INTR_REG;
-               hdr[1] = ZG_INTR_MASK_FIFO0;
-               spi_transfer(hdr, 2, 1);
-
-               intr_state = ZG_INTR_ST_WT_INTR_REG;
-               next_cmd = ZG_BYTE_COUNT_FIFO0_REG;
-            }
-            else if (intr_val) {
-               intr_state = 0;
-            }
-            else {
-               intr_state = 0;
-            }
-
-            break;
+            intr_state = ZG_INTR_ST_WT_INTR_REG;
+            next_cmd = ZG_BYTE_COUNT_FIFO1_REG;
          }
+         else if ( (intr_val & ZG_INTR_MASK_FIFO0) == ZG_INTR_MASK_FIFO0) {
+            hdr[0] = ZG_INTR_REG;
+            hdr[1] = ZG_INTR_MASK_FIFO0;
+            spi_transfer(hdr, 2, 1);
+
+            intr_state = ZG_INTR_ST_WT_INTR_REG;
+            next_cmd = ZG_BYTE_COUNT_FIFO0_REG;
+         }
+         else if (intr_val) {
+            intr_state = 0;
+         }
+         else {
+            intr_state = 0;
+         }
+
+         break;
+      }
       case ZG_INTR_ST_WT_INTR_REG:
          hdr[0] = 0x40 | next_cmd;
          hdr[1] = 0x00;
@@ -260,24 +258,36 @@ void zg_process_isr()
          intr_state = ZG_INTR_ST_RD_CTRL_REG;
          break;
       case ZG_INTR_ST_RD_CTRL_REG:
-         {
-            U16 rx_byte_cnt = (0x0000 | (hdr[1] << 8) | hdr[2]) & 0x0fff;
+      {
+            // Get the size of the incoming packet
+         U16 rx_byte_cnt = (0x0000 | (hdr[1] << 8) | hdr[2]) & 0x0fff;
 
+         // Check if our buffer is large enough for packet
+            if(rx_byte_cnt + 1 < (U16)UIP_BUFSIZE ) {
             zg_buf[0] = ZG_CMD_RD_FIFO;
+            // Copy ZG2100 buffer contents into zg_buf (uip_buf)             
             spi_transfer(zg_buf, rx_byte_cnt + 1, 1);
-
-            hdr[0] = ZG_CMD_RD_FIFO_DONE;
-            spi_transfer(hdr, 1, 1);
-
+            // interrupt from zg2100 was meaningful and requires further processing
             intr_valid = 1;
-
-            intr_state = 0;
-            break;
          }
+         else {
+            // Too Big, ignore it and continue
+            intr_valid = 0; 
+         }
+
+         // Tell ZG2100 we're done reading from its buffer
+         hdr[0] = ZG_CMD_RD_FIFO_DONE;
+         spi_transfer(hdr, 1, 1);
+            
+         // Done reading interrupt from ZG2100
+         intr_state = 0;
+         break;
+      }
       }
    } while (intr_state);
-//   nvic_globalirq_enable();
-   intr_occured = 0;
+   if (!gpio_read_bit(GPIOA_BASE, 0)) {
+      intr_occured = 1;
+   }
 }
 
 void zg_send(U8* buf, U16 len)
@@ -352,9 +362,9 @@ void zg_write_wep_key(U8* cmd_buf)
 {
    zg_wep_key_req_t* cmd = (zg_wep_key_req_t*)cmd_buf;
 
-   cmd->slot = 3;		// WEP key slot
-   cmd->keyLen = 13;	// Key length: 5 bytes (64-bit WEP); 13 bytes (128-bit WEP)
-   cmd->defID = 0;		// Default key ID: Key 0, 1, 2, 3
+   cmd->slot = 3;                    // WEP key slot
+   cmd->keyLen = 13;    // Key length: 5 bytes (64-bit WEP); 13 bytes (128-bit WEP)
+   cmd->defID = 0; // Default key ID: Key 0, 1, 2, 3
    cmd->ssidLen = ssid_len;
    memset(cmd->ssid, 0x00, 32);
    memcpy(cmd->ssid, ssid, ssid_len);
@@ -383,7 +393,7 @@ static void zg_write_psk_key(U8* cmd_buf)
 {
    zg_pmk_key_req_t* cmd = (zg_pmk_key_req_t*)cmd_buf;
 
-   cmd->slot = 0;	// WPA/WPA2 PSK slot
+   cmd->slot = 0;       // WPA/WPA2 PSK slot
    cmd->ssidLen = ssid_len;
    memset(cmd->ssid, 0x00, 32);
    memcpy(cmd->ssid, ssid, cmd->ssidLen);
@@ -394,7 +404,6 @@ static void zg_write_psk_key(U8* cmd_buf)
 
 void zg_drv_process()
 {
-      int i;
    // TX frame
    if (tx_ready && !cnf_pending) {
       zg_send(zg_buf, zg_buf_len);
@@ -439,7 +448,7 @@ void zg_drv_process()
                break;
             case ZG_MAC_SUBTYPE_MGMT_REQ_CONNECT:
                LEDConn_on();
-               zg_conn_status = 1;	// connected
+               zg_conn_status = 1;      // connected
                break;
             default:
                break;
@@ -454,7 +463,7 @@ void zg_drv_process()
          case ZG_MAC_SUBTYPE_MGMT_IND_DISASSOC:
          case ZG_MAC_SUBTYPE_MGMT_IND_DEAUTH:
             LEDConn_off();
-            zg_conn_status = 0;	// lost connection
+            zg_conn_status = 0; // lost connection
 
             //try to reconnect
             zg_drv_state = DRV_STATE_START_CONN;
@@ -465,11 +474,11 @@ void zg_drv_process()
 
                if (status == 1 || status == 5) {
                   LEDConn_off();
-                  zg_conn_status = 0;	// not connected
+                  zg_conn_status = 0;   // not connected
                }
                else if (status == 2 || status == 6) {
                   LEDConn_on();
-                  zg_conn_status = 1;	// connected
+                  zg_conn_status = 1;   // connected
                }
             }
             break;
@@ -552,15 +561,15 @@ void zg_drv_process()
       zg_buf[0] = ZG_CMD_WT_FIFO_MGMT;
       zg_buf[1] = ZG_MAC_TYPE_MGMT_REQ;
       zg_buf[2] = ZG_MAC_SUBTYPE_MGMT_REQ_CONNECT_MANAGE;
-      zg_buf[3] = 0x01;	// 0x01 - enable; 0x00 - disable
-      zg_buf[4] = 10;		// num retries to reconnect
-      zg_buf[5] = 0x10 | 0x02 | 0x01;	// 0x10 -	enable start and stop indication messages
-      // 		 	from G2100 during reconnection
-      // 0x02 -	start reconnection on receiving a deauthentication
-      // 			message from the AP
-      // 0x01 -	start reconnection when the missed beacon count
-      // 			exceeds the threshold. uses default value of
-      //			100 missed beacons if not set during initialization
+      zg_buf[3] = 0x01; // 0x01 - enable; 0x00 - disable
+      zg_buf[4] = 10;           // num retries to reconnect
+      zg_buf[5] = 0x10 | 0x02 | 0x01;   // 0x10 -       enable start and stop indication messages
+                              //                        from G2100 during reconnection
+                              // 0x02 - start reconnection on receiving a deauthentication
+                              //                        message from the AP
+                              // 0x01 - start reconnection when the missed beacon count
+                              //                        exceeds the threshold. uses default value of
+                              //                        100 missed beacons if not set during initialization
       zg_buf[6] = 0;
       spi_transfer(zg_buf, 7, 1);
 
@@ -570,36 +579,36 @@ void zg_drv_process()
       zg_drv_state = DRV_STATE_IDLE;
       break;
    case DRV_STATE_START_CONN:
-      {
-         zg_connect_req_t* cmd = (zg_connect_req_t*)&zg_buf[3];
+   {
+      zg_connect_req_t* cmd = (zg_connect_req_t*)&zg_buf[3];
 
-         // start connection to AP
-         zg_buf[0] = ZG_CMD_WT_FIFO_MGMT;
-         zg_buf[1] = ZG_MAC_TYPE_MGMT_REQ;
-         zg_buf[2] = ZG_MAC_SUBTYPE_MGMT_REQ_CONNECT;
+      // start connection to AP
+      zg_buf[0] = ZG_CMD_WT_FIFO_MGMT;
+      zg_buf[1] = ZG_MAC_TYPE_MGMT_REQ;
+      zg_buf[2] = ZG_MAC_SUBTYPE_MGMT_REQ_CONNECT;
 
-         cmd->secType = security_type;
+      cmd->secType = security_type;
 
-         cmd->ssidLen = ssid_len;
-         memset(cmd->ssid, 0, 32);
-         memcpy(cmd->ssid, ssid, ssid_len);
+      cmd->ssidLen = ssid_len;
+      memset(cmd->ssid, 0, 32);
+      memcpy(cmd->ssid, ssid, ssid_len);
 
-         // units of 100 milliseconds
-         cmd->sleepDuration = 0;
+      // units of 100 milliseconds
+      cmd->sleepDuration = 0;
 
-         if (wireless_mode == WIRELESS_MODE_INFRA)
-            cmd->modeBss = 1;
-         else if (wireless_mode == WIRELESS_MODE_ADHOC)
-            cmd->modeBss = 2;
+      if (wireless_mode == WIRELESS_MODE_INFRA)
+         cmd->modeBss = 1;
+      else if (wireless_mode == WIRELESS_MODE_ADHOC)
+         cmd->modeBss = 2;
 
-         spi_transfer(zg_buf, ZG_CONNECT_REQ_SIZE+3, 1);
+      spi_transfer(zg_buf, ZG_CONNECT_REQ_SIZE+3, 1);
 
-         zg_buf[0] = ZG_CMD_WT_FIFO_DONE;
-         spi_transfer(zg_buf, 1, 1);
+      zg_buf[0] = ZG_CMD_WT_FIFO_DONE;
+      spi_transfer(zg_buf, 1, 1);
 
-         zg_drv_state = DRV_STATE_IDLE;
-         break;
-      }
+      zg_drv_state = DRV_STATE_IDLE;
+      break;
+   }
    case DRV_STATE_PROCESS_RX:
       zg_recv(zg_buf, (U16*)&zg_buf_len);
       rx_ready = 1;
