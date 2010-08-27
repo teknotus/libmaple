@@ -78,16 +78,24 @@ static U8 wpa_psk_key[32];
 #define LEDConn_on()                    gpio_write_bit(LED_PORT, LED_PIN, 1);
 #define LEDConn_off()                   gpio_write_bit(LED_PORT, LED_PIN, 0);
 
+/* D4  */
+#define DEBUG_PORT                      GPIOB_BASE
+#define DEBUG_PIN                       5
+
+
 void zg_init()
 {
-   /* slave select */
    gpio_set_mode(CS_PORT, CS_PIN, GPIO_MODE_OUTPUT_PP);
    gpio_write_bit(CS_PORT, CS_PIN, 1);
+
    gpio_set_mode(LED_PORT, LED_PIN, GPIO_MODE_OUTPUT_PP);
    gpio_write_bit(LED_PORT, LED_PIN, 0);
 
+//   gpio_set_mode(DEBUG_PORT, DEBUG_PIN, GPIO_MODE_OUTPUT_PP);
+//   gpio_write_bit(DEBUG_PORT, DEBUG_PIN, 0);
+
    /* initialize the spi  */
-   spi_init(1, SPI_PRESCALE_4, SPI_MSBFIRST, 0);
+   spi_init(1, SPI_PRESCALE_8, SPI_MSBFIRST, 0);
 
    intr_occured = 0;
    intr_valid = 0;
@@ -204,6 +212,7 @@ void zg_interrupt_reg(U8 mask, U8 state)
 void zg_isr()
 {
    intr_occured = 1;
+//   gpio_write_bit(DEBUG_PORT, DEBUG_PIN, 1);
 }
 
 void zg_process_isr()
@@ -285,9 +294,14 @@ void zg_process_isr()
       }
       }
    } while (intr_state);
-   if (!gpio_read_bit(GPIOA_BASE, 0)) {
-      intr_occured = 1;
-   }
+
+//   if (!gpio_read_bit(GPIOA_BASE, 0)) {
+//      gpio_write_bit(DEBUG_PORT, DEBUG_PIN, 1);
+//   } else {
+//      gpio_write_bit(DEBUG_PORT, DEBUG_PIN, 0);
+//   }
+
+   intr_occured = 0;
 }
 
 void zg_send(U8* buf, U16 len)

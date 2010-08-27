@@ -120,7 +120,7 @@ void timer_init(uint8 timer_num, uint16 prescale) {
                               // Update events enabled (etc, see bits [1:2])
                               // Counter disabled for now
 
-    timer->PSC = prescale;    // Prescaling by prescale (duh)
+    timer->PSC = 2;    // Prescaling by prescale (duh)
     timer->ARR = 0xFF;      // Max reload cont
 
     /* initialize all the channels to 50% duty cycle,
