@@ -6,7 +6,7 @@ BUILDDIRS       += $(BUILD_PATH)/$(d)
 
 LIBLO_INCLUDES = -Ilibraries/liblo-0.26/
 # Local flags
-CFLAGS_$(d) := $(WIRISH_INCLUDES) $(LIBMAPLE_INCLUDES) $(LIBLO_INCLUDES) -Ilumen/
+CFLAGS_$(d) := $(WIRISH_INCLUDES) $(LIBMAPLE_INCLUDES) $(LIBLO_INCLUDES) -Ilights/
 
 # Local rules and targets
 cSRCS_$(d) :=   network.c                      \

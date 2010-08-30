@@ -38,7 +38,7 @@ Description:	UDP app for the WiShield 1.0
 #include <string.h>
 #include "udpapp.h"
 #include "config.h"
-#include "lumen.h"
+#include "lights.h"
 
 #include <lo/lo.h>
 
@@ -113,9 +113,9 @@ static unsigned char parse_msg(void)
 //           lo_message_get_argc(message),
 //           lo_message_get_argv(message)[0]->f);
 
-    lumen_set_rgb(lo_message_get_argv(message)[0]->f,
-                  lo_message_get_argv(message)[1]->f,
-                  lo_message_get_argv(message)[2]->f);
+    lights_set_rgb(lo_message_get_argv(message)[0]->f,
+                   lo_message_get_argv(message)[1]->f,
+                   lo_message_get_argv(message)[2]->f);
 
     lo_message_free(message);
 

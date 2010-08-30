@@ -61,4 +61,11 @@ void init(void) {
 //   timer_init(3, 1);
    timer_init(4, 1);
    setupUSB();
+
+   /* d8 d9 d10 d11 d12 d13
+    * d9 timer4 ch2
+    * d10 none 
+    * d11 timer3 ch2
+    * d12 timer3 ch1
+    * d13 none*/
 }
