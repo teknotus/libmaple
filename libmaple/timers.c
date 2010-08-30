@@ -120,8 +120,8 @@ void timer_init(uint8 timer_num, uint16 prescale) {
                               // Update events enabled (etc, see bits [1:2])
                               // Counter disabled for now
 
-    timer->PSC = 2;    // Prescaling by prescale (duh)
-    timer->ARR = 0xFF;      // Max reload cont
+    timer->PSC = 0;    // Prescaling by prescale (duh)
+    timer->ARR = 0xFFFF;      // Max reload cont
 
     /* initialize all the channels to 50% duty cycle,
      * TODO: none of them actually get output unless the gpio pin

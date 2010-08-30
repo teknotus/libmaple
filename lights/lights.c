@@ -96,13 +96,13 @@ void HSVtoRGB( float *r, float *g, float *b, float h, float s, float v )
 }
 
 void lights_set_rgb(float r, float g, float b) {
-   uint8 red;
-   uint8 green;
-   uint8 blue;
+   uint16 red;
+   uint16 green;
+   uint16 blue;
 
-   red   = r * 255;
-   green = g * 255;
-   blue  = b * 255;
+   red   = r * 65535;
+   green = g * 65535;
+   blue  = b * 65535;
 
    red   = (red < DUTY_MIN)   ? DUTY_MIN : red;
    green = (green < DUTY_MIN) ? DUTY_MIN : green;
