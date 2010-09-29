@@ -108,6 +108,9 @@ static unsigned char parse_msg(void)
 
     int result = 0;
     lo_message message = lo_message_deserialise(uip_appdata, bytes_available, &result);
+    if (!message) {
+        return 1;
+    }
 
 //    printf("argc: %u argv[0] = %f\n",
 //           lo_message_get_argc(message),
