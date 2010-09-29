@@ -1,4 +1,4 @@
-/* *****************************************************************************
+/******************************************************************************
  * The MIT License
  *
  * Copyright (c) 2010 Perry Hung.
@@ -20,10 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * ****************************************************************************/
+ *****************************************************************************/
 
 /**
- *  @brief USART definitions and prototypes
+ * @brief USART definitions and prototypes
  */
 
 #ifndef _USART_H_
@@ -39,9 +39,11 @@ extern "C"{
 
 /* usart device numbers  */
 enum {
-   USART1,
-   USART2,
-   USART3,
+    USART1,
+    USART2,
+    USART3,
+    UART4,
+    UART5,
 };
 
 /* peripheral register struct  */
@@ -57,15 +59,14 @@ typedef struct usart_port {
 
 /* usart descriptor  */
 struct usart_dev {
-   usart_port *base;
-   ring_buffer rb;
-   uint8 rx_buf[64];
-   const uint8 rcc_dev_num;
-   const uint8 nvic_dev_num;
+    usart_port *base;
+    ring_buffer rb;
+    uint8 rx_buf[64];
+    const uint8 rcc_dev_num;
+    const uint8 nvic_dev_num;
 };
 
 extern struct usart_dev usart_dev_table[];
-
 
 /**
  * @brief send one character on a usart
@@ -82,7 +83,6 @@ static inline void usart_putc(uint8 usart_num, uint8 byte) {
         ;
 }
 
-
 /**
  * @brief read one character from a usart
  * @param usart_num usart to read from
@@ -92,7 +92,6 @@ static inline uint8 usart_getc(uint8 usart_num) {
     return rb_remove(&usart_dev_table[usart_num].rb);
 }
 
-
 /**
  * @brief return the amount of data available in the rx buffer
  * @param usart_num which usart to check
@@ -101,7 +100,6 @@ static inline uint8 usart_getc(uint8 usart_num) {
 static inline uint32 usart_data_available(uint8 usart_num) {
     return rb_full_count(&usart_dev_table[usart_num].rb);
 }
-
 
 /**
  * @brief removes the contents of the rx fifo
@@ -113,6 +111,7 @@ static inline void usart_reset_rx(uint8 usart_num) {
 
 void usart_init(uint8 usart_num, uint32 baud);
 void usart_disable(uint8 usart_num);
+void usart_disable_all();
 void usart_putstr(uint8 usart_num, const char*);
 void usart_putudec(uint8 usart_num, uint32 val);
 
@@ -120,6 +119,4 @@ void usart_putudec(uint8 usart_num, uint32 val);
 } // extern "C"
 #endif
 
-
-#endif
-
+#endif // _USART_H_

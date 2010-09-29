@@ -1,4 +1,4 @@
-/* *****************************************************************************
+/******************************************************************************
  * The MIT License
  *
  * Copyright (c) 2010 Perry Hung.
@@ -20,23 +20,22 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * ****************************************************************************/
+ *****************************************************************************/
 
 /**
- *  @brief 
+ *  @brief Arduino-compatible ADC implementation.
  */
 
 #include "libmaple.h"
 #include "wirish.h"
 #include "io.h"
 
-extern const PinMapping PIN_MAP[NR_MAPLE_PINS];
-
-/* Assumes that the ADC has been initialized and
- * that the pin is set to ANALOG_INPUT */
+/* Assumes that the ADC has been initialized and that the pin is set
+ * to ANALOG_INPUT */
 uint32 analogRead(uint8 pin) {
-    if (pin >= NR_ANALOG_PINS)
+    if(PIN_MAP[pin].adc == ADC_INVALID) {
         return 0;
+    }
 
     return adc_read(PIN_MAP[pin].adc);
 }

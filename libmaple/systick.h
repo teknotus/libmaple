@@ -1,4 +1,4 @@
-/* *****************************************************************************
+/******************************************************************************
  * The MIT License
  *
  * Copyright (c) 2010 Perry Hung.
@@ -20,12 +20,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * ****************************************************************************/
+ *****************************************************************************/
 
 /**
- *  @file systick.h
+ * @file systick.h
  *
- *  @brief Various system timer definitions
+ * @brief Various system timer definitions
  */
 
 #ifndef _SYSTICK_H_
@@ -43,13 +43,15 @@ extern "C"{
 #endif
 
 void systick_init(uint32 reload_val);
+void systick_disable();
+void systick_resume();
 
 static inline uint32 systick_get_count(void) {
     return __read(SYSTICK_CNT);
 }
 
 static inline uint32 systick_check_underflow(void) {
-   return (__read(SYSTICK_CSR) & SYSTICK_CSR_COUNTFLAG);
+    return (__read(SYSTICK_CSR) & SYSTICK_CSR_COUNTFLAG);
 }
 
 #ifdef __cplusplus

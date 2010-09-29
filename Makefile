@@ -1,67 +1,89 @@
 .DEFAULT_GOAL := sketch
 
+# Valid BOARDs: maple, maple_native, ...
 BOARD ?= maple
+<<<<<<< HEAD
 MAPLE_TARGET ?= flash
 V = 1
+=======
+MEMORY_TARGET ?= flash
+
+# USB ID for DFU upload
+VENDOR_ID  := 1EAF
+PRODUCT_ID := 0003
+
+# Guess the MCU based on the BOARD (can be overridden )
+ifeq ($(BOARD), maple)
+   MCU := STM32F103RB
+   PRODUCT_ID := 0003
+endif
+ifeq ($(BOARD), maple_native)
+   MCU := STM32F103ZE
+   PRODUCT_ID := 0003
+endif
+>>>>>>> master
 
 # Useful paths
-SRCROOT := $(dir)
+ifeq ($(LIB_MAPLE_HOME),)
+SRCROOT := .
+else
+SRCROOT := $(LIB_MAPLE_HOME)
+endif
 BUILD_PATH = build
-LIBMAPLE_PATH := libmaple
+LIBMAPLE_PATH := $(SRCROOT)/libmaple
+SUPPORT_PATH := $(SRCROOT)/support
 
 # Useful variables
-GLOBAL_CFLAGS    := -Os -g -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
-                    -ffunction-sections -fdata-sections -Wl,--gc-sections
-GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall
+GLOBAL_CFLAGS   := -Os -g -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
+                   -ffunction-sections -fdata-sections -Wl,--gc-sections   \
+                   -DBOARD_$(BOARD) -DMCU_$(MCU)
+GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall -DBOARD_$(BOARD) -DMCU_$(MCU)
+GLOBAL_ASFLAGS  := -mcpu=cortex-m3 -march=armv7-m -mthumb -DBOARD_$(BOARD) \
+                   -DMCU_$(MCU) -x assembler-with-cpp
 
-
-LDDIR    := support/ld
+LDDIR    := $(SUPPORT_PATH)/ld
 LDFLAGS  = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR)    \
             -mcpu=cortex-m3 -mthumb -Xlinker     \
             --gc-sections --print-gc-sections --march=armv7-m -Wall
 
 # Set up build rules and some useful templates
-include support/make/build-rules.mk
-include support/make/build-templates.mk
-
-# Maple USB id
-VENDOR_ID  := 1EAF
-PRODUCT_ID := 0003
+include $(SUPPORT_PATH)/make/build-rules.mk
+include $(SUPPORT_PATH)/make/build-templates.mk
 
 # Some target specific things
-ifeq ($(MAPLE_TARGET), ram)
+ifeq ($(MEMORY_TARGET), ram)
+   LDSCRIPT := $(BOARD)/ram.ld
    VECT_BASE_ADDR := VECT_TAB_RAM
-   LDSCRIPT := ram.ld
 endif
-ifeq ($(MAPLE_TARGET), flash)
-   LDSCRIPT := flash.ld
+ifeq ($(MEMORY_TARGET), flash)
+   LDSCRIPT := $(BOARD)/flash.ld
    VECT_BASE_ADDR := VECT_TAB_FLASH
 endif
-ifeq ($(MAPLE_TARGET), jtag)
-   LDSCRIPT := jtag.ld
+ifeq ($(MEMORY_TARGET), jtag)
+   LDSCRIPT := $(BOARD)/jtag.ld
    VECT_BASE_ADDR := VECT_TAB_BASE
 endif
 
 # Set all submodules here
-LIBMAPLE_MODULES := libmaple
-LIBMAPLE_MODULES += wirish
-LIBMAPLE_MODULES += libraries/WiShield
-LIBMAPLE_MODULES += libraries/liblo-0.26
-LIBMAPLE_MODULES += lights
+LIBMAPLE_MODULES := $(SRCROOT)/libmaple
+LIBMAPLE_MODULES += $(SRCROOT)/wirish
+LIBMAPLE_MODULES += $(SRCROOT)/libraries/WiShield
+LIBMAPLE_MODULES += $(SRCROOT)/libraries/liblo-0.26
+LIBMAPLE_MODULES += $(SRCROOT)/lights
 
 # call each module rules.mk
 $(foreach m,$(LIBMAPLE_MODULES),$(eval $(call LIBMAPLE_MODULE_template,$(m))))
 
 # Main target
-include support/make/build-targets.mk
+include build-targets.mk
 
 .PHONY: install sketch clean help debug cscope tags ctags ram flash jtag
 
 # Target upload commands
-UPLOAD_ram   := support/scripts/reset.py && \
+UPLOAD_ram   := $(SUPPORT_PATH)/scripts/reset.py && \
                 sleep 1                  && \
                 $(DFU) -a0 -d $(VENDOR_ID):$(PRODUCT_ID) -D $(BUILD_PATH)/$(BOARD).bin -R
-UPLOAD_flash := support/scripts/reset.py && \
+UPLOAD_flash := $(SUPPORT_PATH)/scripts/reset.py && \
                 sleep 1                  && \
                 $(DFU) -a1 -d $(VENDOR_ID):$(PRODUCT_ID) -D $(BUILD_PATH)/$(BOARD).bin -R
 UPLOAD_jtag  := $(OPENOCD) -f support/openocd/flash.cfg
@@ -75,7 +97,7 @@ install: $(BUILD_PATH)/$(BOARD).bin
 # Force a rebuild if the maple target changed
 PREV_BUILD_TYPE = $(shell cat $(BUILD_PATH)/build-type 2>/dev/null)
 build-check:
-ifneq ($(PREV_BUILD_TYPE), $(MAPLE_TARGET))
+ifneq ($(PREV_BUILD_TYPE), $(MEMORY_TARGET))
 	$(shell rm -rf $(BUILD_PATH))
 endif
 
@@ -88,11 +110,11 @@ help:
 	@echo ""
 	@echo "  libmaple Makefile help"
 	@echo "  ----------------------"
-	@echo "  Compile targets (default MAPLE_TARGET=flash):"
+	@echo "  Compile targets (default MEMORY_TARGET=flash):"
 	@echo "      ram:    Compile sketch code to ram"
 	@echo "      flash:  Compile sketch code to flash"
 	@echo "      jtag:   Compile sketch code to jtag"
-	@echo "      sketch: Compile sketch code to target MAPLE_TARGET"
+	@echo "      sketch: Compile sketch code to target MEMORY_TARGET"
 	@echo "  "
 	@echo "  Programming targets:"
 	@echo "      install:  Upload code to target"
@@ -119,10 +141,10 @@ ctags:
 	@echo "Made tags file for VIM code browsing"
 
 ram:
-	@$(MAKE) MAPLE_TARGET=ram --no-print-directory sketch
+	@$(MAKE) MEMORY_TARGET=ram --no-print-directory sketch
 
 flash:
-	@$(MAKE) MAPLE_TARGET=flash --no-print-directory sketch
+	@$(MAKE) MEMORY_TARGET=flash --no-print-directory sketch
 
 jtag:
-	@$(MAKE) MAPLE_TARGET=jtag --no-print-directory sketch
+	@$(MAKE) MEMORY_TARGET=jtag --no-print-directory sketch

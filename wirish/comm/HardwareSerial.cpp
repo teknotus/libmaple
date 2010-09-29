@@ -1,4 +1,4 @@
-/* *****************************************************************************
+/******************************************************************************
  * The MIT License
  *
  * Copyright (c) 2010 Perry Hung.
@@ -20,12 +20,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * ****************************************************************************/
+ *****************************************************************************/
 
 /**
- *  @file HardwareSerial.cpp
+ * @file HardwareSerial.cpp
  *
- *  @brief Wiring-like serial api
+ * @brief Wiring-like serial api
  */
 
 #include "wirish.h"
@@ -34,9 +34,10 @@
 #include "gpio.h"
 #include "timers.h"
 
-HardwareSerial Serial1(USART1, 4500000UL, GPIOA_BASE, 9, 10, 1, 2);
-HardwareSerial Serial2(USART2, 2250000UL, GPIOA_BASE, 2, 3,  2, 3);
+HardwareSerial Serial1(USART1, 4500000UL, GPIOA_BASE, 9, 10, TIMER1, 2);
+HardwareSerial Serial2(USART2, 2250000UL, GPIOA_BASE, 2, 3,  TIMER2, 3);
 HardwareSerial Serial3(USART3, 2250000UL, GPIOB_BASE, 10, 11, 0, 0);
+// TODO: High density device ports
 
 HardwareSerial::HardwareSerial(uint8 usart_num,
                                uint32 max_baud,
@@ -67,18 +68,18 @@ void HardwareSerial::write(unsigned char ch) {
 }
 
 void HardwareSerial::begin(uint32 baud) {
-   if (baud > max_baud) {
-      return;
-   }
+    if (baud > max_baud) {
+        return;
+    }
 
-   gpio_set_mode(gpio_port, tx_pin, GPIO_MODE_AF_OUTPUT_PP);
-   gpio_set_mode(gpio_port, rx_pin, GPIO_MODE_INPUT_FLOATING);
+    gpio_set_mode(gpio_port, tx_pin, GPIO_MODE_AF_OUTPUT_PP);
+    gpio_set_mode(gpio_port, rx_pin, GPIO_MODE_INPUT_FLOATING);
 
-   if ((usart_num == USART1) ||
-       (usart_num == USART2)) {
-      /* turn off any pwm if there's a conflict on this usart */
-      timer_set_mode(timer_num, compare_num, TIMER_DISABLED);
-   }
+    if ((usart_num == USART1) ||
+        (usart_num == USART2)) {
+        /* turn off any pwm if there's a conflict on this usart */
+        timer_set_mode(timer_num, compare_num, TIMER_DISABLED);
+    }
 
     usart_init(usart_num, baud);
 }

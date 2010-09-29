@@ -24,8 +24,8 @@ cppSRCS_$(d) := wirish_math.cpp          \
                 comm/HardwareSerial.cpp  \
                 comm/HardwareSPI.cpp 	 \
                 usb_serial.cpp 	         \
-				HardwareTimer.cpp		 \
-                cxxabi-compat.cpp
+		HardwareTimer.cpp        \
+                cxxabi-compat.cpp        \
 
 cFILES_$(d) := $(cSRCS_$(d):%=$(d)/%)
 cppFILES_$(d) := $(cppSRCS_$(d):%=$(d)/%)
