@@ -2,10 +2,6 @@
 
 # Valid BOARDs: maple, maple_native, ...
 BOARD ?= maple
-<<<<<<< HEAD
-MAPLE_TARGET ?= flash
-V = 1
-=======
 MEMORY_TARGET ?= flash
 
 # USB ID for DFU upload
@@ -21,7 +17,6 @@ ifeq ($(BOARD), maple_native)
    MCU := STM32F103ZE
    PRODUCT_ID := 0003
 endif
->>>>>>> master
 
 # Useful paths
 ifeq ($(LIB_MAPLE_HOME),)
