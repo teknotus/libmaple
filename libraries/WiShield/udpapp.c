@@ -52,27 +52,20 @@ void dummy_app_appcall(void)
 {
 }
 
-struct uip_udp_conn *test_conn;
-
 void udpapp_init(void)
 {
    uip_ipaddr_t addr;
    struct uip_udp_conn *c;
 
-   uip_ipaddr(&addr, 255, 255, 255, 255);
-   c = uip_udp_new(&addr, HTONS(0));
+   uip_ipaddr(&addr, 192, 168, 1, 116);
+   c = uip_udp_new(&addr, HTONS(12345));
    if(c != NULL) {
-      test_conn = c;
       uip_udp_bind(c, HTONS(12344));
    }
 
    s.state = STATE_INIT;
 
    PT_INIT(&s.pt);
-}
-
-static void set_light_rgb(unsigned char r, unsigned char g, unsigned char b) {
-    // TODO
 }
 
 typedef struct {
@@ -90,21 +83,8 @@ static unsigned char parse_msg(void)
     int argc;
     lo_arg **argv;
 
-    // TODO Parse OSC message
-
-    gpio_write_bit(GPIOA_BASE, 1, 1);
-    gpio_write_bit(GPIOA_BASE, 1, 0);
-
     unsigned char* pData = uip_appdata;
     p = uip_appdata;
-
-//    iprintf("uip_datalen: %u pData[0] = %x str: %s\n", bytes_available, pData[0], pData);
-//    printf("uip_datalen: %u path = %s (%f, %f, %f)\n",
-//            bytes_available,
-//            p->path,
-//            0,
-//            0,
-//            0);
 
     int result = 0;
     lo_message message = lo_message_deserialise(uip_appdata, bytes_available, &result);
@@ -112,36 +92,11 @@ static unsigned char parse_msg(void)
         return 1;
     }
 
-//    printf("argc: %u argv[0] = %f\n",
-//           lo_message_get_argc(message),
-//           lo_message_get_argv(message)[0]->f);
-
     lights_set_rgb(lo_message_get_argv(message)[0]->f,
                    lo_message_get_argv(message)[1]->f,
                    lo_message_get_argv(message)[2]->f);
 
     lo_message_free(message);
-
-    /* unsigned char checksum = 0; */
-    /* for (i = 0; i < 4; ++i) { */
-    /*     checksum += pData[i]; */
-    /* } */
-    /* if (checksum != pData[4]) { */
-    /*     // Checksum doesn't match */
-    /* } */
-
-    /* char r, g, b; */
-    /* switch(pData[0]) { */
-    /*     case 'S': */
-    /*         r = pData[1]; */
-    /*         g = pData[2]; */
-    /*         b = pData[3]; */
-    /*         set_light_rgb(r,g,b); */
-    /*         break; */
-    /*     case 'Q': */
-    /*         // quit */
-    /*         break; */
-    /* } */
 
     return 1;
 }

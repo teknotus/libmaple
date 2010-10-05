@@ -104,9 +104,9 @@ void lights_set_rgb(float r, float g, float b) {
    green = g * 65535;
    blue  = b * 65535;
 
-   red   = (red < DUTY_MIN)   ? DUTY_MIN : red;
-   green = (green < DUTY_MIN) ? DUTY_MIN : green;
-   blue  = (blue < DUTY_MIN)  ? DUTY_MIN : blue;
+//   red   = (red < DUTY_MIN)   ? DUTY_MIN : red;
+//   green = (green < DUTY_MIN) ? DUTY_MIN : green;
+//   blue  = (blue < DUTY_MIN)  ? DUTY_MIN : blue;
 
    pwmWrite(RED_PIN,   red);
    pwmWrite(GREEN_PIN, green);

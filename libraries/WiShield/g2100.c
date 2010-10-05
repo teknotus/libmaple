@@ -95,7 +95,7 @@ void zg_init()
 //   gpio_write_bit(DEBUG_PORT, DEBUG_PIN, 0);
 
    /* initialize the spi  */
-   spi_init(1, SPI_PRESCALE_8, SPI_MSBFIRST, 0);
+   spi_init(1, SPI_PRESCALE_4, SPI_MSBFIRST, 0);
 
    intr_occured = 0;
    intr_valid = 0;
@@ -274,32 +274,26 @@ void zg_process_isr()
          // Check if our buffer is large enough for packet
             if(rx_byte_cnt + 1 < (U16)UIP_BUFSIZE ) {
             zg_buf[0] = ZG_CMD_RD_FIFO;
-            // Copy ZG2100 buffer contents into zg_buf (uip_buf)             
+            // Copy ZG2100 buffer contents into zg_buf (uip_buf)
             spi_transfer(zg_buf, rx_byte_cnt + 1, 1);
             // interrupt from zg2100 was meaningful and requires further processing
             intr_valid = 1;
          }
          else {
             // Too Big, ignore it and continue
-            intr_valid = 0; 
+            intr_valid = 0;
          }
 
          // Tell ZG2100 we're done reading from its buffer
          hdr[0] = ZG_CMD_RD_FIFO_DONE;
          spi_transfer(hdr, 1, 1);
-            
+
          // Done reading interrupt from ZG2100
          intr_state = 0;
          break;
       }
       }
    } while (intr_state);
-
-//   if (!gpio_read_bit(GPIOA_BASE, 0)) {
-//      gpio_write_bit(DEBUG_PORT, DEBUG_PIN, 1);
-//   } else {
-//      gpio_write_bit(DEBUG_PORT, DEBUG_PIN, 0);
-//   }
 
    intr_occured = 0;
 }
