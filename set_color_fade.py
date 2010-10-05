@@ -6,9 +6,14 @@ import colorsys
 import math
 import time
 
-step_size = 0.001
-address   = '255.255.255.255'
-port      = 12344
+addresses  = ('192.168.1.2',
+              '192.168.1.3')
+port       = 12344
+
+step_size  = 0.001
+delay      = 0.01
+saturation = 1.0
+value      = 0
 
 
 def frange5(limit1, limit2 = None, increment = 1.):
@@ -31,22 +36,23 @@ def frange5(limit1, limit2 = None, increment = 1.):
   count = int(math.ceil(limit2 - limit1)/increment)
   return (limit1 + n*increment for n in range(count))
 
-def set_light(r, g, b):
+def set_light(address, r, g, b):
+    try:
+        target = liblo.Address(address, port)
+    except liblo.AddressError, err:
+        print str(err)
+        sys.exit()
+
     liblo.send(target, "/light/color/set",
                ('f', r),
                ('f', g),
                ('f', b))
-try:
-    target = liblo.Address(address, port)
-except liblo.AddressError, err:
-    print str(err)
-    sys.exit()
-
 while True:
     for hue in frange5(0, 360.0, step_size):
-        [r, g, b] = colorsys.hsv_to_rgb(hue, 1, 0.01)
-        print [r, g, b]
-        set_light(float(r),
-                  float(g),
-                  float(b))
-        time.sleep(0.01)
+        [r, g, b] = colorsys.hsv_to_rgb(hue, saturation, value)
+#        print [r, g, b]
+        for address in addresses:
+            set_light(address, float(r),
+                               float(g),
+                               float(b))
+        time.sleep(delay)

@@ -13,10 +13,10 @@
 // unsigned char subnet_mask[] = {255, 0, 0, 0};         // subnet mask for the local network
 // const char    ssid[]        = {"545meraki"};     // max 32 bytes
 
-unsigned char local_ip[]    = {192, 168, 0,   17};         // IP address of WiShield
-unsigned char gateway_ip[]  = {192, 168, 0,   1};         // router or gateway IP address
+unsigned char local_ip[]    = {192, 168, 1,   3};         // IP address of WiShield
+unsigned char gateway_ip[]  = {192, 168, 1,   1};         // router or gateway IP address
 unsigned char subnet_mask[] = {255, 255, 255, 0};         // subnet mask for the local network
-const char    ssid[]        = {"acousticcombustion"};     // max 32 bytes
+const char    ssid[]        = {"ether"};     // max 32 bytes
 
 
 unsigned char security_type = 0;                           // 0 - open; 1 - WEP; 2 - WPA; 3 - WPA2
