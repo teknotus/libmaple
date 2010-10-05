@@ -7,13 +7,14 @@ import math
 import time
 
 addresses  = ('192.168.1.2',
-              '192.168.1.3')
+              '192.168.1.3',
+              '192.168.1.4')
 port       = 12344
 
 step_size  = 0.001
 delay      = 0.01
 saturation = 1.0
-value      = 0
+value      = 1.0
 
 
 def frange5(limit1, limit2 = None, increment = 1.):

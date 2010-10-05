@@ -68,7 +68,7 @@ void init(void) {
     adc_init();
     timer_init(TIMER1, 1);
     timer_init(TIMER2, 1);
-//    timer_init(TIMER3, 1);
+    timer_init(TIMER3, 1);
     timer_init(TIMER4, 1);
 #if NR_TIMERS >= 8
     timer_init(TIMER5, 1);

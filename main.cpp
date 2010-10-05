@@ -13,7 +13,7 @@
 // unsigned char subnet_mask[] = {255, 0, 0, 0};         // subnet mask for the local network
 // const char    ssid[]        = {"545meraki"};     // max 32 bytes
 
-unsigned char local_ip[]    = {192, 168, 1,   3};         // IP address of WiShield
+unsigned char local_ip[]    = {192, 168, 1,   4};         // IP address of WiShield
 unsigned char gateway_ip[]  = {192, 168, 1,   1};         // router or gateway IP address
 unsigned char subnet_mask[] = {255, 255, 255, 0};         // subnet mask for the local network
 const char    ssid[]        = {"ether"};     // max 32 bytes
@@ -55,10 +55,6 @@ void setup()
    digitalWrite(10, HIGH);
 
    Serial2.begin(115200);
-
-   pinMode(3, OUTPUT);
-   digitalWrite(3, HIGH);
-   digitalWrite(3, LOW);
 
    pinMode(RED_PIN, PWM);
    pinMode(GREEN_PIN, PWM);

@@ -5,9 +5,8 @@
 #ifndef _LIGHTS_H_
 #define _LIGHTS_H_
 
-#define RED_PIN          5  // pb6 timer4 ch1
+#define RED_PIN          3  // pb6 timer4 ch1
 #define GREEN_PIN        6  // pa8 timer1 ch1
-//#define BLUE_PIN         7  // pa9 timer1 ch2
 #define BLUE_PIN         8  // pa1 timer2 ch2
 
 #ifdef __cplusplus
