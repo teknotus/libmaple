@@ -1,4 +1,4 @@
-/* *****************************************************************************
+/******************************************************************************
  * The MIT License
  *
  * Copyright (c) 2010 Perry Hung.
@@ -20,11 +20,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * ****************************************************************************/
+ *****************************************************************************/
 
 
 /**
- *  @brief basic stm32 flash setup routines
+ * @file flash.h
+ * @brief basic stm32 flash setup routines
  */
 
 #ifndef _FLASH_H_

@@ -1,4 +1,4 @@
-/* *****************************************************************************
+/******************************************************************************
  * The MIT License
  *
  * Copyright (c) 2010 Perry Hung.
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * ****************************************************************************/
+ *****************************************************************************/
 
 /**
  *  @file ext_interrupts.c
@@ -32,49 +32,26 @@
 #include "exti.h"
 #include "ext_interrupts.h"
 
-typedef struct ExtiInfo {
-    uint8 channel;
-    uint8 port;
-} ExtiInfo;
-
-static ExtiInfo PIN_TO_EXTI_CHANNEL[NR_MAPLE_PINS] = {
-    {EXTI3,  EXTI_CONFIG_PORTA},      // D0/PA3
-    {EXTI2,  EXTI_CONFIG_PORTA},      // D1/PA2
-    {EXTI0,  EXTI_CONFIG_PORTA},      // D2/PA0
-    {EXTI1,  EXTI_CONFIG_PORTA},      // D3/PA1
-    {EXTI5,  EXTI_CONFIG_PORTB},      // D4/PB5
-    {EXTI6,  EXTI_CONFIG_PORTB},      // D5/PB6
-    {EXTI8,  EXTI_CONFIG_PORTA},      // D6/PA8
-    {EXTI9,  EXTI_CONFIG_PORTA},      // D7/PA9
-    {EXTI10, EXTI_CONFIG_PORTA},      // D8/PA10
-    {EXTI7,  EXTI_CONFIG_PORTB},      // D9/PB7
-    {EXTI4,  EXTI_CONFIG_PORTA},      // D10/PA4
-    {EXTI7,  EXTI_CONFIG_PORTA},      // D11/PA7
-    {EXTI6,  EXTI_CONFIG_PORTA},      // D12/PA6
-    {EXTI5,  EXTI_CONFIG_PORTA},      // D13/PA5
-};
-
-
 /**
  *  @brief Attach an interrupt handler to be triggered on a given
  *  transition on the pin. Runs in interrupt context
  *
- *  @param[in] pin Maple pin number
- *  @param[in] handler Function to run upon external interrupt trigger.
- *  @param[in] mode Type of transition to trigger on, eg falling, rising, etc.
+ *  @param pin Maple pin number
+ *  @param handler Function to run upon external interrupt trigger.
+ *  @param mode Type of transition to trigger on, eg falling, rising, etc.
  *
  *  @sideeffect Registers a handler
  */
-int attachInterrupt(uint8 pin, voidFuncPtr handler, uint32 mode) {
+void attachInterrupt(uint8 pin, voidFuncPtr handler, uint32 mode) {
     uint8 outMode;
-    /* Parameter checking  */
-    if (pin >= NR_MAPLE_PINS) {
-        return EXT_INTERRUPT_INVALID_PIN;
+
+    /* Parameter checking */
+    if (pin >= NR_GPIO_PINS) {
+        return;
     }
 
     if (!handler) {
-        ASSERT(0);
-        return EXT_INTERRUPT_INVALID_FUNCTION;
+        return;
     }
 
     switch (mode) {
@@ -88,22 +65,27 @@ int attachInterrupt(uint8 pin, voidFuncPtr handler, uint32 mode) {
         outMode = EXTI_RISING_FALLING;
         break;
     default:
-        ASSERT(0);
-        return EXT_INTERRUPT_INVALID_MODE;;
+        return;
     }
 
-    exti_attach_interrupt(PIN_TO_EXTI_CHANNEL[pin].channel,
-                          PIN_TO_EXTI_CHANNEL[pin].port,
-                          handler, mode);
+    exti_attach_interrupt(PIN_MAP[pin].exti_port,
+                          PIN_MAP[pin].pin,
+                          handler,
+                          mode);
 
-    return 0;
+    return;
 }
 
-int detachInterrupt(uint8 pin) {
-    if (!(pin < NR_MAPLE_PINS)) {
-        return EXT_INTERRUPT_INVALID_PIN;
+/**
+ * @brief Disable an external interrupt
+ * @param pin maple pin number
+ * @sideeffect unregisters external interrupt handler
+ */
+void detachInterrupt(uint8 pin) {
+    if (!(pin < NR_GPIO_PINS)) {
+        return;
     }
 
-    exti_detach_interrupt(PIN_TO_EXTI_CHANNEL[pin].channel);
+    exti_detach_interrupt(PIN_MAP[pin].pin);
 }
 

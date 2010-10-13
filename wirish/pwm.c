@@ -1,4 +1,4 @@
-/* *****************************************************************************
+/******************************************************************************
  * The MIT License
  *
  * Copyright (c) 2010 Perry Hung.
@@ -20,10 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * ****************************************************************************/
+ *****************************************************************************/
 
 /**
- *  @brief 
+ *  @brief Arduino-compatible PWM implementation.
  */
 
 #include "wirish.h"
@@ -31,19 +31,18 @@
 #include "io.h"
 #include "pwm.h"
 
-extern const PinMapping PIN_MAP[NR_MAPLE_PINS];
-
 void pwmWrite(uint8 pin, uint16 duty_cycle) {
     TimerCCR ccr;
 
-    if (pin >= NR_MAPLE_PINS) {
+    if (pin >= NR_GPIO_PINS) {
         return;
     }
 
-    ccr = PIN_MAP[pin].timer_channel;
+    ccr = (TimerCCR)(PIN_MAP[pin].timer_channel);
 
-    if (ccr == TIMER_INVALID)
+    if (ccr == (TimerCCR)TIMER_INVALID) {
         return;
+    }
 
     timer_pwm_write_ccr(ccr, duty_cycle);
 }

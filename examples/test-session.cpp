@@ -1,26 +1,9 @@
-/* *****************************************************************************
- * The MIT License
- *
- * Copyright (c) 2010 LeafLabs LLC.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- * ****************************************************************************/
+// Interactive Test Session for LeafLabs Maple
+// Copyright (c) 2010 LeafLabs LLC.
+//
+//  Useful for testing Maple features and troubleshooting. Select a COMM port
+//  (SerialUSB or Serial2) before compiling and then enter 'h' at the prompt
+//  for a list of commands.
 
 #include "wirish.h"
 
@@ -55,8 +38,12 @@ void setup() {
     /* Set up the LED to blink  */
     pinMode(LED_PIN, OUTPUT);
 
+    /* Start up the serial ports */
+    Serial1.begin(9600);
+    Serial2.begin(9600);
+    Serial3.begin(9600);
+
     /* Send a message out over COMM interface */
-    Serial2.begin(9600);    // if USART; 9600 is more compatible
     COMM.println(" ");
     COMM.println("    __   __             _      _");
     COMM.println("   |  \\/  | __ _ _ __ | | ___| |"); 

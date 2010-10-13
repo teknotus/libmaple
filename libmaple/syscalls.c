@@ -1,4 +1,4 @@
-/* *****************************************************************************
+/******************************************************************************
  * The MIT License
  *
  * Copyright (c) 2010 Perry Hung.
@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * ****************************************************************************/
+ *****************************************************************************/
 
 #include "libmaple.h"
 #include "usart.h"
@@ -31,22 +31,14 @@
 /* _end is set in the linker command file */
 extern caddr_t _end;
 
-/* just in case, most boards have at least some memory */
-#ifndef RAMSIZE
-#  define RAMSIZE             (caddr_t)0x50000
-#endif
-
-#define STACK_TOP 0x20000800
+void uart_send(const char*str);
 
 /*
  * sbrk -- changes heap size size. Get nbytes more
  *         RAM. We just increment a pointer in what's
  *         left of memory on the board.
  */
-caddr_t
-_sbrk(nbytes)
-int nbytes;
-{
+caddr_t _sbrk(int nbytes) {
     static caddr_t heap_ptr = NULL;
     caddr_t        base;
 
@@ -63,61 +55,50 @@ int nbytes;
     }
 }
 
-int _open(const char *path, int flags, ...)
-{
+int _open(const char *path, int flags, ...) {
     return 1;
 }
 
-int _close(int fd)
-{
+int _close(int fd) {
     return 0;
 }
 
-int _fstat(int fd, struct stat *st)
-{
+int _fstat(int fd, struct stat *st) {
     st->st_mode = S_IFCHR;
     return 0;
 }
 
-int _isatty(int fd)
-{
+int _isatty(int fd) {
     return 1;
 }
 
-int isatty(int fd)
-{
+int isatty(int fd) {
     return 1;
 }
 
-int _lseek(int fd, off_t pos, int whence)
-{
+int _lseek(int fd, off_t pos, int whence) {
     return -1;
 }
 
-unsigned char getch(void)
-{
+unsigned char getch(void) {
    return usart_getc(REDIRECT_USART_NUM);
 }
 
 
-int _read(int fd, char *buf, size_t cnt)
-{
+int _read(int fd, char *buf, size_t cnt) {
     *buf = getch();
 
     return 1;
 }
 
-void putch(unsigned char c)
-{
+void putch(unsigned char c) {
     if (c == '\n')  {
        putch('\r');
     }
-
     usart_putc(REDIRECT_USART_NUM, c);
 }
 
-void cgets(char *s, int bufsize)
-{
+void cgets(char *s, int bufsize) {
     char *p;
     int c;
     int i;
@@ -129,11 +110,9 @@ void cgets(char *s, int bufsize)
 
     p = s;
 
-    for (p = s; p < s + bufsize-1;)
-    {
+    for (p = s; p < s + bufsize-1;) {
         c = getch();
-        switch (c)
-        {
+        switch (c) {
         case '\r' :
         case '\n' :
             putch('\r');
@@ -142,8 +121,7 @@ void cgets(char *s, int bufsize)
             return;
 
         case '\b' :
-            if (p > s)
-            {
+            if (p > s) {
                 *p-- = 0;
                 putch('\b');
                 putch(' ');
@@ -160,8 +138,7 @@ void cgets(char *s, int bufsize)
     return;
 }
 
-int _write(int fd, const char *buf, size_t cnt)
-{
+int _write(int fd, const char *buf, size_t cnt) {
     int i;
 
     for (i = 0; i < cnt; i++)
@@ -171,8 +148,7 @@ int _write(int fd, const char *buf, size_t cnt)
 }
 
 /* Override fgets() in newlib with a version that does line editing */
-char *fgets(char *s, int bufsize, void *f)
-{
+char *fgets(char *s, int bufsize, void *f) {
     cgets(s, bufsize);
     return s;
 }
