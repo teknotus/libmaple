@@ -27,11 +27,13 @@ Table of contents:
    Maple/Arduino Compatibility Reference <compatibility>
    Maple Language Reference <language>
    Maple Library Reference <libraries>
-   libmaple Documentation and APIs <libmaple>   
+   libmaple Command-Line Tools and APIs <libmaple>   
    Troubleshooting <troubleshooting>
    Hardware-Specific Documentation <hardware>
+   External Interrupts <external-interrupts>
    Maple bootloader <bootloader>
    Known Problems <errata>
+   [Temporary] Arduino docs TOC <foo>
 
 Indices and tables
 ==================
