@@ -61,7 +61,7 @@ void WiShield::init()
    attachInterrupt(INT_PIN, zg_isr, FALLING);
 
    pinMode(CS_PIN, OUTPUT);
-   pinMode(CS_PIN, HIGH);
+   digitalWrite(CS_PIN, HIGH);
 
    while(zg_get_conn_state() != 1) {
       zg_drv_process();

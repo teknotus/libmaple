@@ -1136,8 +1136,8 @@ uip_process(u8_t flag)
        address of the packet is checked. */
     if(uip_udp_conn->lport != 0 &&
        UDPBUF->destport == uip_udp_conn->lport &&
-       (uip_udp_conn->rport == 0 ||
-        UDPBUF->srcport == uip_udp_conn->rport) &&
+//       (uip_udp_conn->rport == 0 ||
+//        UDPBUF->srcport == uip_udp_conn->rport) &&
        (uip_ipaddr_cmp(uip_udp_conn->ripaddr, all_zeroes_addr) ||
 	uip_ipaddr_cmp(uip_udp_conn->ripaddr, all_ones_addr) ||
 	uip_ipaddr_cmp(BUF->srcipaddr, uip_udp_conn->ripaddr))) {
