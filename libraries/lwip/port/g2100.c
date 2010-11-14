@@ -96,8 +96,8 @@ void zg_init()
    tx_ready = 0;
    rx_ready = 0;
    cnf_pending = 0;
-   zg_buf = (U8 *)pbuf_alloc(PBUF_RAW, 1, PBUF_POOL);
-   zg_buf_len = PBUF_POOL_BUFSIZE;
+   zg_buf = (U8 *)pbuf_alloc(PBUF_RAW, ZG_BUFFER_SIZE, PBUF_POOL);
+   zg_buf_len = ZG_BUFFER_SIZE;
 
    zg_chip_reset();
    zg_interrupt2_reg();
@@ -339,6 +339,11 @@ void zg_set_buf(U8* buf, U16 buf_len)
 {
    zg_buf = buf;
    zg_buf_len = buf_len;
+}
+
+U8 zg_get_cnf_pending()
+{
+   return cnf_pending;
 }
 
 U8* zg_get_mac()

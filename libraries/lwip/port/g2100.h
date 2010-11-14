@@ -194,7 +194,7 @@ enum {
 #define ZG_INTR2_MASK_ALL       (0xffff)
 
 // Buffer size
-#define ZG_BUFFER_SIZE      450
+#define ZG_BUFFER_SIZE      1520
 
 // Types of networks
 #define ZG_BSS_INFRA        (1)    // infrastructure only
@@ -292,6 +292,7 @@ U16 zg_get_rx_status();
 void zg_clear_rx_status();
 void zg_set_tx_status(U8 status);
 U8 zg_get_conn_state();
+static U8* zg_buf;
 void zg_set_buf(U8* buf, U16 buf_len);
 U8* zg_get_mac();
 void zg_set_ssid(U8* ssid, U8 ssid_len);

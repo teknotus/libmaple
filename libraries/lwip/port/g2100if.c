@@ -34,6 +34,7 @@
  * ZG2100 driver for lwip
  */
 
+#include <string.h>
 #include "lwip/opt.h"
 #include "lwip/def.h"
 #include "lwip/mem.h"
@@ -44,7 +45,6 @@
 #include "netif/etharp.h"
 #include "netif/ppp_oe.h"
 #include "witypes.h"
-#include "g2100if.h"
 #include "g2100.h"
 
 
@@ -64,7 +64,7 @@ struct g2100if {
 };
 
 /* Forward declarations. */
-static void  g2100if_input(struct netif *netif);
+static void  g2100if_input(struct pbuf *p, struct netif *netif);
 
 /**
  * In this function, the hardware should be initialized.
@@ -124,6 +124,7 @@ low_level_output(struct netif *netif, struct pbuf *p)
   struct g2100if *g2100if = netif->state;
   struct pbuf *q;
 
+  // ***
   //initiate transfer();
   
 #if ETH_PAD_SIZE
@@ -134,9 +135,16 @@ low_level_output(struct netif *netif, struct pbuf *p)
     /* Send the data from the pbuf to the interface, one pbuf at a
        time. The size of the data in each pbuf is kept in the ->len
        variable. */
+    // ***
     //send data from(q->payload, q->len);
+    zg_set_buf(q->payload, q->len);
+	zg_set_tx_status(1);
+    while (!zg_get_cnf_pending()) { // wait until transfer is confirmed
+    	zg_drv_process();
+    }
   }
 
+  // ***
   //signal that packet should be sent();
 
 #if ETH_PAD_SIZE
@@ -165,7 +173,8 @@ low_level_input(struct netif *netif)
 
   /* Obtain the size of the packet and put it into the "len"
      variable. */
-  //len = ;
+  // ***
+  len = zg_get_rx_status();
 
 #if ETH_PAD_SIZE
   len += ETH_PAD_SIZE; /* allow room for Ethernet padding */
@@ -186,9 +195,13 @@ low_level_input(struct netif *netif)
       /* Read enough bytes to fill this pbuf in the chain. The
        * available data in the pbuf is given by the q->len
        * variable. */
+      // ***
       //read data into(q->payload, q->len);
+      memcpy(&zg_buf, q->payload, q->len);
     }
+     // ***
     //acknowledge that packet has been read();
+    zg_clear_rx_status();
 
 #if ETH_PAD_SIZE
     pbuf_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
@@ -196,7 +209,9 @@ low_level_input(struct netif *netif)
 
     LINK_STATS_INC(link.recv);
   } else {
+    // ***
     //drop packet();
+    zg_clear_rx_status();
     LINK_STATS_INC(link.memerr);
     LINK_STATS_INC(link.drop);
   }
@@ -214,11 +229,10 @@ low_level_input(struct netif *netif)
  * @param netif the lwip network interface structure for this g2100if
  */
 static void
-g2100if_input(struct netif *netif)
+g2100if_input(struct pbuf *p, struct netif *netif)
 {
   struct g2100if *g2100if;
   struct eth_hdr *ethhdr;
-  struct pbuf *p;
 
   g2100if = netif->state;
 

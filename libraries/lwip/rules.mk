@@ -7,11 +7,12 @@ BUILDDIRS       += $(BUILD_PATH)/$(d)/src
 BUILDDIRS       += $(BUILD_PATH)/$(d)/src/api
 BUILDDIRS       += $(BUILD_PATH)/$(d)/src/core
 BUILDDIRS       += $(BUILD_PATH)/$(d)/src/core/ipv4
+BUILDDIRS       += $(BUILD_PATH)/$(d)/src/netif
 BUILDDIRS       += $(BUILD_PATH)/$(d)/port
 BUILDDIRS       += $(BUILD_PATH)/$(d)/port/arch
 
 # Local flags
-LWIP_INCLUDES := -I$(d)/src/include -I$(d)/src/include/ipv4 -I$(d)/port -I$(d)/port/arch 
+LWIP_INCLUDES := -I$(d)/src/include -I$(d)/src/include/ipv4 -I$(d) -I$(d)/port -I$(d)/port/arch 
 
 CFLAGS_$(d) := $(WIRISH_INCLUDES) $(LIBMAPLE_INCLUDES) $(LWIP_INCLUDES)
 
@@ -44,7 +45,9 @@ cSRCS_$(d) := src/api/netdb.c                       \
               src/core/ipv4/igmp.c                  \
               src/core/ipv4/inet.c                  \
               src/core/mem.c                        \
+              src/core/memp.c                       \
               src/core/init.c                       \
+              src/netif/etharp.c                    \
               port/g2100.c                          \
               port/g2100if.c                        \
               port/httpd.c
