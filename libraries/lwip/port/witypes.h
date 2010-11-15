@@ -63,6 +63,8 @@ typedef unsigned short          U16;
 typedef unsigned int            u32;
 typedef unsigned int            U32;
 
+#ifndef _WIRISH_H_
 typedef unsigned char           boolean;
+#endif
 
 #endif /* WITYPES_H_ */

@@ -64,7 +64,7 @@ struct g2100if {
 };
 
 /* Forward declarations. */
-static void  g2100if_input(struct pbuf *p, struct netif *netif);
+err_t g2100if_input(struct pbuf *p, struct netif *netif);
 
 /**
  * In this function, the hardware should be initialized.
@@ -228,7 +228,7 @@ low_level_input(struct netif *netif)
  *
  * @param netif the lwip network interface structure for this g2100if
  */
-static void
+err_t
 g2100if_input(struct pbuf *p, struct netif *netif)
 {
   struct g2100if *g2100if;

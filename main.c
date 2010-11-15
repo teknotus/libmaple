@@ -1,9 +1,10 @@
-// lwip main.cpp
+// lwip main.c - main loop
 
-#include "wirish.h"
 #include "libmaple.h"
+#include "wirish.h"
 #include "spi.h"
 #include "gpio.h"
+#include "wirish/time.h"
 
 #include "port/witypes.h"
 #include "port/g2100.h"
@@ -28,12 +29,26 @@
 
 #define CLOCKTICKS_PER_MS 1
 
+#define INT_PIN    2
+#define CS_PIN     10
+
 // Wireless configuration parameters ----------------------------------------
 //unsigned char local_ip[] = {192,168,0,103};	// IP address of WiShield
 //unsigned char gateway_ip[] = {192,168,0,1};	// router or gateway IP address
 //unsigned char subnet_mask[] = {255,255,255,0};	// subnet mask for the local network
 const char ssid[] = {"Forest"};		// max 32 bytes
 unsigned char security_type = 0;	// 0 - open; 1 - WEP; 2 - WPA; 3 - WPA2
+
+// WPA/WPA2 passphrase
+const char security_passphrase[] = {"12345678"};	// max 64 characters
+// WEP 128-bit keys
+// sample HEX keys
+const char wep_keys[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,	// Key 0
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	0x00,	// Key 1
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	0x00,	// Key 2
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,	0x00	// Key 3
+};
+
 
 // setup the wireless mode
 // infrastructure - connect to AP
@@ -46,46 +61,48 @@ unsigned char security_passphrase_len;
 struct netif netif;
 
 // (manual) host IP configuration
-static ip_addr ipaddr, netmask, gw;
+struct ip_addr ipaddr, netmask, gw;
 
 
 
 //---------------------------------------------------------------------------
 
 void setup() {
-     // Serial2.begin(115200);
-     // WiFi.init();
 	 /* startup defaults (may be overridden by one or more opts) */
-	 IP4_ADDR(&gw, 192,168,0,1);
-	 IP4_ADDR(&ipaddr, 192,168,0,2);
-	 IP4_ADDR(&netmask, 255,255,255,0);
+     zg_init();
+	 pinMode(INT_PIN, INPUT_PULLUP);
+	 attachInterrupt(INT_PIN, zg_isr, FALLING);
+
+	 pinMode(CS_PIN, OUTPUT);
+	 pinMode(CS_PIN, HIGH);
+
+	 while(zg_get_conn_state() != 1) {
+	     zg_drv_process();
+	 }
+
+	//	   lwip_init();
+	//
+	//	   netif_add(&netif, &ipaddr, &netmask, &gw, NULL, g2100if_init, g2100if_input);
+	//	   netif_set_default(&netif);
+	//	   netif_set_up(&netif);
+//	 IP4_ADDR(&gw, 192,168,0,1);
+//	 IP4_ADDR(&ipaddr, 192,168,0,2);
+//	 IP4_ADDR(&netmask, 255,255,255,0);
 }
 
 // This is the webpage that is served up by the webserver
 const char webpage[]= {"HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body>0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789</body></html>"};
 
 
-byte buf[] = "Hello world!";
-
-void main_init() {
-	   zg_init();
-	   lwip_init();
-
-//	   netif_add(&netif, &ipaddr, &netmask, &gw, NULL, g2100if_init, g2100if_input);
-	   netif_set_default(&netif);
-	   netif_set_up(&netif);
-/*
-	   while(zg_get_conn_state() != 1) {
-	      zg_drv_process();
-	   }
-*/
-}
+const char buf[] = "Hello world!";
 
 void loop() {
 
 	   unsigned long last_time, last_arp_time;
 	   last_time = 0;
 	   last_arp_time = 0;
+
+	   //delay(1000);
 
 	   /*
 	   struct pbuf *p;
@@ -97,22 +114,22 @@ void loop() {
 
 	   */
 
-	   if (millis() - last_arp_time >= ARP_TMR_INTERVAL * CLOCKTICKS_PER_MS) {
-	       etharp_tmr();
-	       last_arp_time = millis();
-	   }
-	   if(millis() - last_time >= TCP_TMR_INTERVAL * CLOCKTICKS_PER_MS) {
-	     tcp_tmr();
-	     last_time = millis();
-	   }
+//	   if (millis() - last_arp_time >= ARP_TMR_INTERVAL * CLOCKTICKS_PER_MS) {
+//	       etharp_tmr();
+//	       last_arp_time = millis();
+//	   }
+//	   if(millis() - last_time >= TCP_TMR_INTERVAL * CLOCKTICKS_PER_MS) {
+//	     tcp_tmr();
+//	     last_time = millis();
+//	   }
 
-//	   zg_drv_process();
+      //zg_drv_process();
 }
 
 // Force init to be called *first*, i.e. before static object allocation.
 // Otherwise, statically allocated object that need libmaple may fail.
 __attribute__(( constructor )) void premain() {
-   main_init();
+   init();
 }
 
 

@@ -78,6 +78,8 @@ static U8 wpa_psk_key[32];
 #define LEDConn_on()                    gpio_write_bit(LED_PORT, LED_PIN, 1);
 #define LEDConn_off()                   gpio_write_bit(LED_PORT, LED_PIN, 0);
 
+uint8 uip_buf[ZG_BUFFER_SIZE+2];
+
 void zg_init()
 {
    /* slave select */
@@ -96,7 +98,8 @@ void zg_init()
    tx_ready = 0;
    rx_ready = 0;
    cnf_pending = 0;
-   zg_buf = (U8 *)pbuf_alloc(PBUF_RAW, ZG_BUFFER_SIZE, PBUF_POOL);
+//   zg_buf = (U8 *)pbuf_alloc(PBUF_RAW, ZG_BUFFER_SIZE, PBUF_POOL);
+   zg_buf = uip_buf;
    zg_buf_len = ZG_BUFFER_SIZE;
 
    zg_chip_reset();

@@ -11,9 +11,9 @@ BUILDDIRS       += $(BUILD_PATH)/$(d)/src/netif
 BUILDDIRS       += $(BUILD_PATH)/$(d)/port
 BUILDDIRS       += $(BUILD_PATH)/$(d)/port/arch
 
-# Local flags
 LWIP_INCLUDES := -I$(d)/src/include -I$(d)/src/include/ipv4 -I$(d) -I$(d)/port -I$(d)/port/arch 
 
+# Local flags
 CFLAGS_$(d) := $(WIRISH_INCLUDES) $(LIBMAPLE_INCLUDES) $(LWIP_INCLUDES)
 
 # Local rules and targets
