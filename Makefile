@@ -17,6 +17,10 @@ ifeq ($(BOARD), maple_native)
    MCU := STM32F103ZE
    PRODUCT_ID := 0003
 endif
+ifeq ($(BOARD), maple_mini)
+   MCU := STM32F103CB
+   PRODUCT_ID := 0003
+endif
 
 # Useful paths
 ifeq ($(LIB_MAPLE_HOME),)
@@ -62,8 +66,12 @@ endif
 # Set all submodules here
 LIBMAPLE_MODULES := $(SRCROOT)/libmaple
 LIBMAPLE_MODULES += $(SRCROOT)/wirish
+# Official libraries:
 LIBMAPLE_MODULES += $(SRCROOT)/libraries/lwip
-LIBMAPLE_MODULES += $(SRCROOT)/libraries/softi2c
+LIBMAPLE_MODULES += $(SRCROOT)/libraries/Servo
+LIBMAPLE_MODULES += $(SRCROOT)/libraries/LiquidCrystal
+LIBMAPLE_MODULES += $(SRCROOT)/libraries/Wire
+>>>>>>> newlibraries
 
 # call each module rules.mk
 $(foreach m,$(LIBMAPLE_MODULES),$(eval $(call LIBMAPLE_MODULE_template,$(m))))

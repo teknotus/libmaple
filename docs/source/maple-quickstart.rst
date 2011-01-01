@@ -13,7 +13,7 @@ that computer.
 
 If you have trouble along the way, try the :ref:`troubleshooting page
 <troubleshooting>` for help with some common problems.  If all else
-fails, try our `forum`_, or `contact us directly <contact>`_!
+fails, try our `forum`_, or `contact`_ us directly!
 
 .. contents:: Contents
    :local:
@@ -65,6 +65,8 @@ bottom window, and then a confirmation message will appear:
 .. image:: /_static/img/verify-success.png
    :align: center
    :alt: Code verified successfully.
+
+.. _maple-quickstart-upload:
 
 Upload that program!
 --------------------
@@ -127,7 +129,7 @@ OS X:
    :alt: Board type and serial port for the OS X
 
 Then press the "Upload" button to upload your program to the
-Maple. 
+Maple.
 
 .. image:: /_static/img/upload-button.png
    :align: center
