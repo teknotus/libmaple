@@ -1,0 +1,112 @@
+// Sample main.cpp file. Blinks an LED, sends a message out USART2
+// and turns on PWM on pin 2
+
+#include "wirish.h"
+
+#define LED_PIN 13
+#define PWM_PIN  2
+
+#include "SoftI2C.h" // Maple software I2C library
+#define SCL 1
+#define SDA 2
+#define EEPROM_ADDRESS 0x50
+
+void i2c_eeprom_write_byte(int deviceAddress, unsigned int eeaddress, byte data) {
+	int rdata = data;
+	SoftI2C.writeReg(deviceAddress, (int) (eeaddress >> 8)); // MSB
+	SoftI2C.writeReg(deviceAddress, (int) (eeaddress & 0xFF)); // LSB
+	SoftI2C.writeReg(deviceAddress, rdata);
+}
+
+// WARNING: address is a page address, 6-bit end will wrap around
+// also, data can be maximum of about 30 bytes, because the Wire library has a buffer of 32 bytes
+void i2c_eeprom_write_page(int deviceAddress, unsigned int eeaddresspage,
+		byte* data, byte length) {
+	SoftI2C.writeReg(deviceAddress, (int) (eeaddresspage >> 8)); // MSB
+	SoftI2C.writeReg(deviceAddress, (int) (eeaddresspage & 0xFF)); // LSB
+	byte c;
+	for (c = 0; c < length; c++)
+		SoftI2C.writeReg(deviceAddress, data[c]);
+}
+
+byte i2c_eeprom_read_byte(int deviceAddress, unsigned int eeaddress) {
+	byte rdata = 0xFF;
+	SoftI2C.writeReg(deviceAddress, (int) (eeaddress >> 8)); // MSB
+	SoftI2C.writeReg(deviceAddress, (int) (eeaddress & 0xFF)); // LSB
+	SoftI2C.writeReg(deviceAddress, 1);
+	if (SoftI2C.readReg(deviceAddress))
+		rdata = SoftI2C.readReg(deviceAddress);
+	return rdata;
+}
+
+// maybe let's not read more than 30 or 32 bytes at a time!
+void i2c_eeprom_read_buffer(int deviceAddress, unsigned int eeaddress,
+		byte *buffer, int length) {
+	SoftI2C.writeReg(deviceAddress, (int) (eeaddress >> 8)); // MSB
+	SoftI2C.writeReg(deviceAddress, (int) (eeaddress & 0xFF)); // LSB
+	SoftI2C.writeReg(deviceAddress, length);
+	int c = 0;
+	for (c = 0; c < length; c++)
+		if (SoftI2C.readReg(deviceAddress))
+			buffer[c] = SoftI2C.readReg(deviceAddress);
+}
+
+void setup() {
+	/* Set up the LED to blink  */
+	pinMode(LED_PIN, OUTPUT);
+
+	/* Send a message out the usb virtual serial port  */
+	SerialUSB.println("Hello!");
+
+	/* Turn on PWM on pin PWM_PIN */
+	pinMode(PWM_PIN, PWM);
+	pwmWrite(PWM_PIN, 0x8000);
+
+	char somedata[] = "this is data from the eeprom"; // data to write
+	SoftI2C.begin(SDA, SCL); // initialize the connection
+//	i2c_eeprom_write_page(EEPROM_ADDRESS, 0, (byte *) somedata,
+//			sizeof(somedata)); // write to EEPROM
+	i2c_eeprom_write_byte(EEPROM_ADDRESS, 0, (byte) somedata[0]);
+
+	delay(10); //add a small delay
+
+	SerialUSB.println("Memory written");
+
+}
+
+int toggle = 0;
+
+void loop() {
+	toggle ^= 1;
+	digitalWrite(LED_PIN, toggle);
+	delay(100);
+
+//	int addr = 0; //first address
+	byte b = i2c_eeprom_read_byte(EEPROM_ADDRESS, 0); // access the first address from the memory
+	SerialUSB.print((char) b); //print content to serial port
+
+//	while (b != 0) {
+//		SerialUSB.print((char) b); //print content to serial port
+//		addr++; //increase address
+//      b = i2c_eeprom_read_byte(EEPROM_ADDRESS, addr); //access an address from the memory
+//	}
+	SerialUSB.println(" ");
+	delay(2000);
+
+}
+
+// Force init to be called *first*, i.e. before static object allocation.
+// Otherwise, statically allocated object that need libmaple may fail.
+__attribute__(( constructor )) void premain() {
+	init();
+}
+
+int main(void) {
+	setup();
+
+	while (1) {
+		loop();
+	}
+	return 0;
+}
+
