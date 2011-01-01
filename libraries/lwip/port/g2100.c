@@ -98,8 +98,8 @@ void zg_init()
    tx_ready = 0;
    rx_ready = 0;
    cnf_pending = 0;
-//   zg_buf = (U8 *)pbuf_alloc(PBUF_RAW, ZG_BUFFER_SIZE, PBUF_POOL);
-   zg_buf = uip_buf;
+   zg_buf = (U8 *)pbuf_alloc(PBUF_RAW, ZG_BUFFER_SIZE, PBUF_POOL);
+   //zg_buf = uip_buf;
    zg_buf_len = ZG_BUFFER_SIZE;
 
    zg_chip_reset();

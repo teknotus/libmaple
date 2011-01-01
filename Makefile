@@ -63,6 +63,7 @@ endif
 LIBMAPLE_MODULES := $(SRCROOT)/libmaple
 LIBMAPLE_MODULES += $(SRCROOT)/wirish
 LIBMAPLE_MODULES += $(SRCROOT)/libraries/lwip
+LIBMAPLE_MODULES += $(SRCROOT)/libraries/softi2c
 
 # call each module rules.mk
 $(foreach m,$(LIBMAPLE_MODULES),$(eval $(call LIBMAPLE_MODULE_template,$(m))))
