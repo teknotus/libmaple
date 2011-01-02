@@ -71,7 +71,6 @@ LIBMAPLE_MODULES += $(SRCROOT)/libraries/lwip
 LIBMAPLE_MODULES += $(SRCROOT)/libraries/Servo
 LIBMAPLE_MODULES += $(SRCROOT)/libraries/LiquidCrystal
 LIBMAPLE_MODULES += $(SRCROOT)/libraries/Wire
->>>>>>> newlibraries
 
 # call each module rules.mk
 $(foreach m,$(LIBMAPLE_MODULES),$(eval $(call LIBMAPLE_MODULE_template,$(m))))
