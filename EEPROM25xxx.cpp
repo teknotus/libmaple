@@ -67,17 +67,17 @@ void EEPROM25xxx::begin(void) {
 // write one byte
 void EEPROM25xxx::write(uint16 address, uint8 data) {
   eepromEnable();
-  while (eepromWriteInProgress()) {
-    // do nothing - busy wait, otherwise we get write errors
-    // probably should check a timer here and bail out with an error if we wait too long
-  }
   spiPtr->send(WREN); 
-  eepromDisable(); // Needed for EEPROM to accept WREN opcode
+  eepromDisable(); // Needed for EEPROM to accept write enable (WREN) opcode
   eepromEnable();
   spiPtr->send(WRITE); 
   eepromSendAddress(address);
   spiPtr->send(data); 
-  eepromDisable();
+  eepromDisable(); // Needed for EEPROM to initiate write cycle
+  eepromEnable();
+  while (eepromWriteInProgress()) {
+    // do nothing - busy wait, otherwise we get write errors
+  }
 }
 
 // read one byte
