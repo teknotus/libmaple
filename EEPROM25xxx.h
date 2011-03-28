@@ -66,21 +66,21 @@ http://datasheet.octopart.com/25LC640A-I/P-Microchip-datasheet-537224.pdf
 #define WIP_MASK 0x01
 #define WEL_MASK 0x02
 
-class EEPROM_25xxx {
+class EEPROM25xxx {
   private:
     int chipSelectPin;
     HardwareSPI *spiPtr;
-    void eeprom_send_address(uint16 address);
-    boolean eeprom_read_status_register_bit(uint8 mask);
+    void eepromSendAddress(uint16 address);
+    boolean eepromReadStatusRegisterBit(uint8 mask);
   public:
-    EEPROM_25xxx(int, HardwareSPI *);
+    EEPROM25xxx(int, HardwareSPI *);
     void begin(void);
     void write(uint16, uint8);
     uint8 read(uint16);
-    boolean eeprom_write_in_progress(void);
-    boolean eeprom_write_enabled(void);
-    void eeprom_disable(void);
-    void eeprom_enable(void);
+    boolean eepromWriteInProgress(void);
+    boolean eepromWriteEnabled(void);
+    void eepromDisable(void);
+    void eepromEnable(void);
 };
 
 #endif

@@ -51,67 +51,67 @@ mode.
 */
 
 #include "wirish.h"
-#include "EEPROM_25xxx.h"
+#include "EEPROM25xxx.h"
 
-EEPROM_25xxx::EEPROM_25xxx(int newChipSelectPin, HardwareSPI *newSpi) {
+EEPROM25xxx::EEPROM25xxx(int newChipSelectPin, HardwareSPI *newSpi) {
     chipSelectPin = newChipSelectPin;
     spiPtr = newSpi;
 }
 
-void EEPROM_25xxx::begin(void) {
+void EEPROM25xxx::begin(void) {
     pinMode(chipSelectPin, OUTPUT);
-    eeprom_disable();
+    eepromDisable();
     spiPtr->begin(SPI_9MHZ, MSBFIRST, SPI_MODE_0);
 }
 
 // write one byte
-void EEPROM_25xxx::write(uint16 address, uint8 data) {
-  eeprom_enable();
-  while (eeprom_write_in_progress()) {
+void EEPROM25xxx::write(uint16 address, uint8 data) {
+  eepromEnable();
+  while (eepromWriteInProgress()) {
     // do nothing - busy wait, otherwise we get write errors
     // probably should check a timer here and bail out with an error if we wait too long
   }
   spiPtr->send(WREN); 
-  eeprom_disable(); // Needed for EEPROM to accept WREN opcode
-  eeprom_enable();
+  eepromDisable(); // Needed for EEPROM to accept WREN opcode
+  eepromEnable();
   spiPtr->send(WRITE); 
-  eeprom_send_address(address);
+  eepromSendAddress(address);
   spiPtr->send(data); 
-  eeprom_disable();
+  eepromDisable();
 }
 
 // read one byte
-uint8 EEPROM_25xxx::read(uint16 address) {
+uint8 EEPROM25xxx::read(uint16 address) {
   uint8 data;
-  eeprom_enable();
+  eepromEnable();
   spiPtr->send(READ); 
-  eeprom_send_address(address);
+  eepromSendAddress(address);
   data = spiPtr->send(DUMMY_DATA);
-  eeprom_disable();
+  eepromDisable();
   return data;
 }
 
-void EEPROM_25xxx::eeprom_send_address(uint16 address) {
+void EEPROM25xxx::eepromSendAddress(uint16 address) {
   uint8 most_significant_byte = address>>8;
   uint8 least_significant_byte = address;
   spiPtr->send(most_significant_byte);      
   spiPtr->send(least_significant_byte);
 }
 
-boolean EEPROM_25xxx::eeprom_write_in_progress(void) {
-  return eeprom_read_status_register_bit(WIP_MASK);
+boolean EEPROM25xxx::eepromWriteInProgress(void) {
+  return eepromReadStatusRegisterBit(WIP_MASK);
 }
 
-boolean EEPROM_25xxx::eeprom_write_enabled(void) {
-  return eeprom_read_status_register_bit(WEL_MASK);
+boolean EEPROM25xxx::eepromWriteEnabled(void) {
+  return eepromReadStatusRegisterBit(WEL_MASK);
 }
 
-boolean EEPROM_25xxx::eeprom_read_status_register_bit(uint8 mask) {
+boolean EEPROM25xxx::eepromReadStatusRegisterBit(uint8 mask) {
   uint8 data;
-  eeprom_enable();
+  eepromEnable();
   spiPtr->send(RDSR); 
   data = spiPtr->send(DUMMY_DATA);
-  eeprom_disable();
+  eepromDisable();
   if (data && mask) {
     return true;
   } else {
@@ -119,11 +119,11 @@ boolean EEPROM_25xxx::eeprom_read_status_register_bit(uint8 mask) {
   }
 }
 
-void EEPROM_25xxx::eeprom_disable(void) {
+void EEPROM25xxx::eepromDisable(void) {
   digitalWrite(chipSelectPin, HIGH);    
 }
 
-void EEPROM_25xxx::eeprom_enable(void) {
+void EEPROM25xxx::eepromEnable(void) {
   digitalWrite(chipSelectPin, LOW); 
 }
 
