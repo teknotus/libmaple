@@ -70,17 +70,17 @@ class EEPROM25xxx {
   private:
     int chipSelectPin;
     HardwareSPI *spiPtr;
-    void eepromSendAddress(uint16 address);
-    boolean eepromReadStatusRegisterBit(uint8 mask);
+    void sendAddress(uint16 address);
+    boolean readStatusRegisterBit(uint8 mask);
   public:
     EEPROM25xxx(int, HardwareSPI *);
     void begin(void);
     void write(uint16, uint8);
     uint8 read(uint16);
-    boolean eepromWriteInProgress(void);
-    boolean eepromWriteEnabled(void);
-    void eepromDisable(void);
-    void eepromEnable(void);
+    boolean writeInProgress(void);
+    boolean writeEnabled(void);
+    void disable(void);
+    void enable(void);
 };
 
 #endif

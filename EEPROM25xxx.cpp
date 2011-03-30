@@ -45,8 +45,8 @@ http://datasheet.octopart.com/25LC640A-I/P-Microchip-datasheet-537224.pdf
 
 Note: this library assumes that the program using the EEPROM has
 exclusive access to the SPI bus. If that is not the case, the caller
-has to reinitialize the SPI hardware with its speed, endianness, and
-mode.
+has to use the begin() method to reinitialize the SPI hardware with
+its speed, endianness, and mode
 
 */
 
@@ -60,58 +60,59 @@ EEPROM25xxx::EEPROM25xxx(int newChipSelectPin, HardwareSPI *newSpi) {
 
 void EEPROM25xxx::begin(void) {
     pinMode(chipSelectPin, OUTPUT);
-    eepromDisable();
+    disable();
     spiPtr->begin(SPI_9MHZ, MSBFIRST, SPI_MODE_0);
 }
 
 // write one byte
 void EEPROM25xxx::write(uint16 address, uint8 data) {
-  eepromEnable();
+  enable();
   spiPtr->send(WREN); 
-  eepromDisable(); // Needed for EEPROM to accept write enable (WREN) opcode
-  eepromEnable();
+  disable(); // Needed for EEPROM to accept write enable (WREN) opcode
+  enable();
   spiPtr->send(WRITE); 
-  eepromSendAddress(address);
+  sendAddress(address);
   spiPtr->send(data); 
-  eepromDisable(); // Needed for EEPROM to initiate write cycle
-  eepromEnable();
-  while (eepromWriteInProgress()) {
+  disable(); // Needed for EEPROM to initiate write cycle
+  enable();
+  while (writeInProgress()) {
     // do nothing - busy wait, otherwise we get write errors
   }
+  disable();
 }
 
 // read one byte
 uint8 EEPROM25xxx::read(uint16 address) {
   uint8 data;
-  eepromEnable();
+  enable();
   spiPtr->send(READ); 
-  eepromSendAddress(address);
+  sendAddress(address);
   data = spiPtr->send(DUMMY_DATA);
-  eepromDisable();
+  disable();
   return data;
 }
 
-void EEPROM25xxx::eepromSendAddress(uint16 address) {
+void EEPROM25xxx::sendAddress(uint16 address) {
   uint8 most_significant_byte = address>>8;
   uint8 least_significant_byte = address;
   spiPtr->send(most_significant_byte);      
   spiPtr->send(least_significant_byte);
 }
 
-boolean EEPROM25xxx::eepromWriteInProgress(void) {
-  return eepromReadStatusRegisterBit(WIP_MASK);
+boolean EEPROM25xxx::writeInProgress(void) {
+  return readStatusRegisterBit(WIP_MASK);
 }
 
-boolean EEPROM25xxx::eepromWriteEnabled(void) {
-  return eepromReadStatusRegisterBit(WEL_MASK);
+boolean EEPROM25xxx::writeEnabled(void) {
+  return readStatusRegisterBit(WEL_MASK);
 }
 
-boolean EEPROM25xxx::eepromReadStatusRegisterBit(uint8 mask) {
+boolean EEPROM25xxx::readStatusRegisterBit(uint8 mask) {
   uint8 data;
-  eepromEnable();
+  enable();
   spiPtr->send(RDSR); 
   data = spiPtr->send(DUMMY_DATA);
-  eepromDisable();
+  disable();
   if (data && mask) {
     return true;
   } else {
@@ -119,11 +120,11 @@ boolean EEPROM25xxx::eepromReadStatusRegisterBit(uint8 mask) {
   }
 }
 
-void EEPROM25xxx::eepromDisable(void) {
+void EEPROM25xxx::disable(void) {
   digitalWrite(chipSelectPin, HIGH);    
 }
 
-void EEPROM25xxx::eepromEnable(void) {
+void EEPROM25xxx::enable(void) {
   digitalWrite(chipSelectPin, LOW); 
 }
 
