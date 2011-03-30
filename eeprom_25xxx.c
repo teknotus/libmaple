@@ -1,6 +1,6 @@
 /*
 
-eeprom25xxx.c
+eeprom_25xxx.c
 Microchip 25xxx EEPROM Library for Maple 
 
 Copyright (c) 2011 Adam Feuer
@@ -53,7 +53,7 @@ its speed, endianness, and mode
 #include "libmaple.h"
 #include "spi.h"
 #include "wirish.h"
-#include "eeprom25xxx.h"
+#include "eeprom_25xxx.h"
 
 void eeprom_25xxx_begin(uint32 spi_num, uint8 chip_select_pin) {
     pinMode(chip_select_pin, OUTPUT);

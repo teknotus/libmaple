@@ -1,6 +1,6 @@
 /*
 
-EEPROM_25xxx.h
+EEPROM25xxx.h
 Microchip 25xxx EEPROM Library for Maple 
 
 Copyright (c) 2011 Adam Feuer
@@ -24,31 +24,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 See http://creativecommons.org/licenses/MIT/ for more information.
-
-This library works with the following EEPROMs: 25xx640, 25xx128, 25xx512, 25xx1024
-
-From the datasheet for the 25xx640 (64kbit) EEPROM:
-
-* SPI interface
-* Max. Clock 10 MHz
-* 8192 x 8-bit Organization
-* 32 Byte Page
-* Self-Timed Erase and Write Cycles (5 ms max.)
-* Block Write Protection
-* Built-In Write Protection
-* Sequential Read
-* High Reliability
-  * Endurance: 1,000,000 erase/write cycles
-  * Data retention: > 200 years
-
-http://datasheet.octopart.com/25LC640A-I/P-Microchip-datasheet-537224.pdf
   
 */
 
-#ifndef EEPROM_25xxx_h
-#define EEPROM_25xxx_h
+#ifndef EEPROM25xxx_h
+#define EEPROM25xxx_h
 
-#include <wirish.h>
+#include "wirish.h"
 
 class EEPROM25xxx {
   private:

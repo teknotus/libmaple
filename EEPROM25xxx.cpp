@@ -1,6 +1,6 @@
 /*
 
-EEPROM_25xxx.cpp
+EEPROM25xxx.cpp
 Microchip 25xxx EEPROM Library for Maple 
 
 Copyright (c) 2011 Adam Feuer
@@ -51,7 +51,7 @@ its speed, endianness, and mode
 */
 
 #include "wirish.h"
-#include "eeprom25xxx.h"
+#include "eeprom_25xxx.h"
 #include "EEPROM25xxx.h"
 
 EEPROM25xxx::EEPROM25xxx(int newChipSelectPin, uint32 newSpiNum) {
