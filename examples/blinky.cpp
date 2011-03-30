@@ -1,29 +1,31 @@
-// Blinks the LED, pin 13
+// Blinks the built-in LED
 
 #include "wirish.h"
 
-#define TEST_PIN 13
+// Use the pin attached to the built-in LED
+#define PIN BOARD_LED_PIN
 
 void setup() {
-    pinMode(TEST_PIN, OUTPUT);
+    pinMode(PIN, OUTPUT);
 }
 
 int toggle = 1;
 
 void loop() {
-    digitalWrite(TEST_PIN, toggle);
+    // You could just use toggleLED() instead, but this illustrates
+    // the use of digitalWrite():
+    digitalWrite(PIN, toggle);
     toggle ^= 1;
     delay(100);
 }
 
 // Force init to be called *first*, i.e. before static object allocation.
-// Otherwise, statically allocated object that need libmaple may fail.
- __attribute__(( constructor )) void premain() {
+// Otherwise, statically allocated objects that need libmaple may fail.
+__attribute__((constructor)) void premain() {
     init();
 }
 
-int main(void)
-{
+int main(void) {
     setup();
 
     while (1) {

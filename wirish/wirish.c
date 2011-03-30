@@ -64,7 +64,9 @@ void init(void) {
     nvic_init();
     systick_init(SYSTICK_RELOAD_VAL);
     gpio_init();
-    adc_init();
+    /* Initialize the ADC for slow conversions, to allow for high
+       impedance inputs. */
+    adc_init(ADC_SMPR_55_5);
     timer_init(TIMER1, 1);
     timer_init(TIMER2, 1);
     timer_init(TIMER3, 1);

@@ -21,6 +21,10 @@ ifeq ($(BOARD), maple_mini)
    MCU := STM32F103CB
    PRODUCT_ID := 0003
 endif
+ifeq ($(BOARD), maple_RET6)
+   MCU := STM32F103RE
+   PRODUCT_ID := 0003
+endif
 
 # Useful paths
 ifeq ($(LIB_MAPLE_HOME),)
@@ -33,7 +37,7 @@ LIBMAPLE_PATH := $(SRCROOT)/libmaple
 SUPPORT_PATH := $(SRCROOT)/support
 
 # Useful variables
-GLOBAL_CFLAGS   := -Os -g -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
+GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
                    -ffunction-sections -fdata-sections -Wl,--gc-sections   \
                    -DBOARD_$(BOARD) -DMCU_$(MCU)
 GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall -DBOARD_$(BOARD) -DMCU_$(MCU)

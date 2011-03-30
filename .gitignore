@@ -6,3 +6,5 @@ TAGS
 *~
 *.swp
 docs/doxygen/
+arm
+cscope*

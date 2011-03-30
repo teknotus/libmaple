@@ -42,8 +42,22 @@
 #define DEBUG_LEVEL DEBUG_ALL
 #endif
 
+/* Bitbanded Memory sections */
+#define BITBAND_SRAM_REF   0x20000000
+#define BITBAND_SRAM_BASE  0x22000000
+#define BITBAND_PERI_REF   0x40000000
+#define BITBAND_PERI_BASE  0x42000000
+
+#define USB_CONFIG_MAX_POWER      (100 >> 1)
+#define RESET_DELAY               (100)
+
+#define ERROR_USART_NUM        USART2
+#define ERROR_USART_BAUD       9600
+#define ERROR_TX_PORT          GPIOA_BASE
+#define ERROR_TX_PIN           2
+
 /* MCU-specific configuration */
-#ifdef MCU_STM32F103RB
+#if defined(MCU_STM32F103RB)
     /* e.g., LeafLabs Maple */
 
     /* Number of GPIO ports (GPIOA, GPIOB, etc.) */
@@ -51,6 +65,9 @@
 
     /* Total number of GPIO pins */
     #define NR_GPIO_PINS             39
+
+    /* Number of 16-bit backup registers */
+    #define NR_BKP_REGS              10
 
     /* Number of timer devices ports, definitely used */
     #define NR_TIMERS                 4
@@ -61,7 +78,7 @@
     /* Has an FSMC bus? */
     #define NR_FSMC                   0
 
-    /* Has an FSMC bus? */
+    /* Has a DAC? */
     #define NR_DAC_PINS               0
 
     /* USB Identifier numbers */
@@ -71,41 +88,23 @@
     #define VCOM_ID_PRODUCT   0x0004
     #define USB_DISC_BANK     GPIOC_BASE
     #define USB_DISC_PIN      12
-    #define USB_CONFIG_MAX_POWER      (100 >> 1)
-    #define RESET_DELAY               (100)
 
     /* Where to put usercode (based on space reserved for bootloader) */
     #define USER_ADDR_ROM 0x08005000
     #define USER_ADDR_RAM 0x20000C00
-    #define STACK_TOP     0x20000800
+    #define STACK_TOP     0x20000800 /* FIXME can this possibly be correct? */
 
-    /* Debug port settings (from ASSERT) */
-    #define ERROR_LED_PORT         GPIOA_BASE
-    #define ERROR_LED_PIN          5
-    #define ERROR_USART_NUM        USART2
-    #define ERROR_USART_BAUD       9600
-    #define ERROR_TX_PORT          GPIOA_BASE
-    #define ERROR_TX_PIN           2
+    #define ERROR_LED_PORT         GPIOB_BASE
+    #define ERROR_LED_PIN          12
 
-    /* Just in case, most boards have at least some memory */
-    #ifndef RAMSIZE
-    #  define RAMSIZE             (caddr_t)0x50000
-    #endif
-
-    /* Bitbanded Memory sections */
-    #define BITBAND_SRAM_REF   0x20000000
-    #define BITBAND_SRAM_BASE  0x22000000
-    #define BITBAND_PERI_REF   0x40000000
-    #define BITBAND_PERI_BASE  0x42000000
-#endif
-
-#ifdef MCU_STM32F103ZE
+#elif defined(MCU_STM32F103ZE)
     /* e.g., LeafLabs Maple Native */
 
     #define NR_GPIO_PORTS             7
-    #define NR_GPIO_PINS             63
+    #define NR_GPIO_PINS            100
+    #define NR_BKP_REGS              42
     #define NR_TIMERS                 8
-    #define NR_USART                  3
+    #define NR_USART                  5 /* NB: 4 and 5 are UART only */
     #define NR_FSMC                   1
     #define NR_DAC_PINS               2
 
@@ -113,8 +112,6 @@
     #define VCOM_ID_PRODUCT   0x0004
     #define USB_DISC_BANK     GPIOB_BASE
     #define USB_DISC_PIN      8
-    #define USB_CONFIG_MAX_POWER      (100 >> 1)
-    #define RESET_DELAY               (100)
 
     #define USER_ADDR_ROM 0x08005000
     #define USER_ADDR_RAM 0x20000C00
@@ -122,26 +119,13 @@
 
     #define ERROR_LED_PORT         GPIOC_BASE
     #define ERROR_LED_PIN          15
-    #define ERROR_USART_NUM        USART1
-    #define ERROR_USART_BAUD       9600
-    #define ERROR_TX_PORT          GPIOA_BASE
-    #define ERROR_TX_PIN           10
 
-    #ifndef RAMSIZE
-    #  define RAMSIZE             (caddr_t)0x50000
-    #endif
-
-    #define BITBAND_SRAM_REF   0x20000000
-    #define BITBAND_SRAM_BASE  0x22000000
-    #define BITBAND_PERI_REF   0x40000000
-    #define BITBAND_PERI_BASE  0x42000000
-#endif
-
-#ifdef MCU_STM32F103CB
+#elif defined(MCU_STM32F103CB)
     /* e.g., LeafLabs Maple Mini */
 
     #define NR_GPIO_PORTS 3
     #define NR_GPIO_PINS  34
+    #define NR_BKP_REGS   10
     #define NR_TIMERS     4
     #define NR_USART      3
     #define NR_FSMC       0
@@ -151,35 +135,42 @@
     #define VCOM_ID_PRODUCT      0x0005
     #define USB_DISC_BANK        GPIOB_BASE
     #define USB_DISC_PIN         9
-    #define USB_CONFIG_MAX_POWER (100 >> 1) /* WTF does this mean */
-    #define RESET_DELAY          100
 
     #define USER_ADDR_ROM 0x08005000
     #define USER_ADDR_RAM 0x20000C00
     #define STACK_TOP     0x20000800
 
     #define ERROR_LED_PORT   GPIOB_BASE
-    #define ERROR_LED_PIN    12
-    #define ERROR_USART_NUM  USART2
-    #define ERROR_USART_BAUD 9600
-    #define ERROR_TX_PORT    GPIOA_BASE
-    #define ERROR_TX_PIN     2
+    #define ERROR_LED_PIN    1
 
-    #ifndef RAMSIZE
-    #  define RAMSIZE             (caddr_t)0x50000
-    #endif
+#elif defined(MCU_STM32F103RE)
+    /* e.g., LeafLabs Maple RET6 Edition */
 
-    /* Bitbanded Memory sections */
-    #define BITBAND_SRAM_REF   0x20000000
-    #define BITBAND_SRAM_BASE  0x22000000
-    #define BITBAND_PERI_REF   0x40000000
-    #define BITBAND_PERI_BASE  0x42000000
-#endif
+    #define NR_GPIO_PORTS             4
+    #define NR_GPIO_PINS             39
+    #define NR_BKP_REGS              42
+    #define NR_TIMERS                 8
+    #define NR_USART                  5 /* NB: 4 and 5 are UART only */
+    #define NR_FSMC                   0
+    #define NR_DAC_PINS               0 /* HACK: LED hooked up to DAC2 */
 
-/* Make sure MCU-specific settings were defined */
-#ifndef NR_GPIO_PORTS
-#error "No MCU type specified. Add something like -DMCU_STM32F103RB " \
+    #define VCOM_ID_VENDOR    0x1EAF
+    #define VCOM_ID_PRODUCT   0x0004
+    #define USB_DISC_BANK     GPIOC_BASE
+    #define USB_DISC_PIN      12
+
+    #define USER_ADDR_ROM 0x08005000
+    #define USER_ADDR_RAM 0x20000C00
+    #define STACK_TOP     0x20000800
+
+    #define ERROR_LED_PORT         GPIOA_BASE
+    #define ERROR_LED_PIN          5
+
+#else
+
+#error "No MCU type specified. Add something like -DMCU_STM32F103RB "   \
        "to your compiler arguments (probably in a Makefile)."
+
 #endif
 
 /* Requires board configuration info */

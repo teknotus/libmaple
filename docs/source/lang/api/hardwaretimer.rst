@@ -21,6 +21,9 @@ documented below on one of the predefined ``HardwareTimer`` instances.
 For example, to set the prescale factor on timer 1 to 5, call
 ``Timer1.setPrescaleFactor(5)``.
 
+.. TODO add code examples that people can copy and paste in case
+.. they're unfamiliar with namespace syntax
+
 .. cpp:class:: HardwareTimer
 
    Class for interacting with a timer.  There are four predefined
@@ -316,6 +319,8 @@ For example, to set the prescale factor on timer 1 to 5, call
 
     The :ref:`setPeriod() <lang-hardwaretimer-setperiod>` method may
     also be used as a convenient alternative.
+
+.. _lang-hardwaretimer-resume:
 
 .. cpp:function:: void HardwareTimer::resume()
 
