@@ -6,49 +6,49 @@
 #define LED_PIN 13
 #define PWM_PIN  2
 
-#include "SoftI2C.h" // Maple software I2C library
+#include "Wire.h" // Maple software I2C library
 #define SCL 1
 #define SDA 2
 #define EEPROM_ADDRESS 0x50
 
 void i2c_eeprom_write_byte(int deviceAddress, unsigned int eeaddress, byte data) {
 	int rdata = data;
-	SoftI2C.writeReg(deviceAddress, (int) (eeaddress >> 8)); // MSB
-	SoftI2C.writeReg(deviceAddress, (int) (eeaddress & 0xFF)); // LSB
-	SoftI2C.writeReg(deviceAddress, rdata);
+	Wire.writeReg(deviceAddress, (int) (eeaddress >> 8)); // MSB
+	Wire.writeReg(deviceAddress, (int) (eeaddress & 0xFF)); // LSB
+	Wire.writeReg(deviceAddress, rdata);
 }
 
 // WARNING: address is a page address, 6-bit end will wrap around
 // also, data can be maximum of about 30 bytes, because the Wire library has a buffer of 32 bytes
 void i2c_eeprom_write_page(int deviceAddress, unsigned int eeaddresspage,
 		byte* data, byte length) {
-	SoftI2C.writeReg(deviceAddress, (int) (eeaddresspage >> 8)); // MSB
-	SoftI2C.writeReg(deviceAddress, (int) (eeaddresspage & 0xFF)); // LSB
+	Wire.writeReg(deviceAddress, (int) (eeaddresspage >> 8)); // MSB
+	Wire.writeReg(deviceAddress, (int) (eeaddresspage & 0xFF)); // LSB
 	byte c;
 	for (c = 0; c < length; c++)
-		SoftI2C.writeReg(deviceAddress, data[c]);
+		Wire.writeReg(deviceAddress, data[c]);
 }
 
 byte i2c_eeprom_read_byte(int deviceAddress, unsigned int eeaddress) {
 	byte rdata = 0xFF;
-	SoftI2C.writeReg(deviceAddress, (int) (eeaddress >> 8)); // MSB
-	SoftI2C.writeReg(deviceAddress, (int) (eeaddress & 0xFF)); // LSB
-	SoftI2C.writeReg(deviceAddress, 1);
-	if (SoftI2C.readReg(deviceAddress))
-		rdata = SoftI2C.readReg(deviceAddress);
+	Wire.writeReg(deviceAddress, (int) (eeaddress >> 8)); // MSB
+	Wire.writeReg(deviceAddress, (int) (eeaddress & 0xFF)); // LSB
+	Wire.writeReg(deviceAddress, 1);
+	if (Wire.readReg(deviceAddress))
+		rdata = Wire.readReg(deviceAddress);
 	return rdata;
 }
 
 // maybe let's not read more than 30 or 32 bytes at a time!
 void i2c_eeprom_read_buffer(int deviceAddress, unsigned int eeaddress,
 		byte *buffer, int length) {
-	SoftI2C.writeReg(deviceAddress, (int) (eeaddress >> 8)); // MSB
-	SoftI2C.writeReg(deviceAddress, (int) (eeaddress & 0xFF)); // LSB
-	SoftI2C.writeReg(deviceAddress, length);
+	Wire.writeReg(deviceAddress, (int) (eeaddress >> 8)); // MSB
+	Wire.writeReg(deviceAddress, (int) (eeaddress & 0xFF)); // LSB
+	Wire.writeReg(deviceAddress, length);
 	int c = 0;
 	for (c = 0; c < length; c++)
-		if (SoftI2C.readReg(deviceAddress))
-			buffer[c] = SoftI2C.readReg(deviceAddress);
+		if (Wire.readReg(deviceAddress))
+			buffer[c] = Wire.readReg(deviceAddress);
 }
 
 void setup() {
@@ -63,7 +63,7 @@ void setup() {
 	pwmWrite(PWM_PIN, 0x8000);
 
 	char somedata[] = "this is data from the eeprom"; // data to write
-	SoftI2C.begin(SDA, SCL); // initialize the connection
+	Wire.begin(SDA, SCL); // initialize the connection
 //	i2c_eeprom_write_page(EEPROM_ADDRESS, 0, (byte *) somedata,
 //			sizeof(somedata)); // write to EEPROM
 	i2c_eeprom_write_byte(EEPROM_ADDRESS, 0, (byte) somedata[0]);
