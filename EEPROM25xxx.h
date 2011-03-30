@@ -27,6 +27,11 @@ See http://creativecommons.org/licenses/MIT/ for more information.
   
 */
 
+/**
+ * @file EEPROM25xxx.h
+ * @brief Microchip 25xxx SPI EEPROM driver class declaration
+ */
+
 #ifndef EEPROM25xxx_h
 #define EEPROM25xxx_h
 

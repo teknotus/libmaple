@@ -25,7 +25,29 @@ THE SOFTWARE.
 
 See http://creativecommons.org/licenses/MIT/ for more information.
 
-This library works with the following EEPROMs: 25xx640, 25xx128, 25xx512, 25xx1024
+*/
+
+#include "wirish.h"
+#include "eeprom_25xxx.h"
+#include "EEPROM25xxx.h"
+
+/**
+ * @brief Microchip 25xxx SPI EEPROM interface
+ * 
+ * This driver works with the following EEPROMs: 25xx640, 25xx128, 25xx512, 25xx1024 
+ *
+ * It only implements single-byte read and write.
+ *
+ * Chip enable and disable functions are provided as a convenience.
+ *
+ * Note: this library assumes that the program using the EEPROM has
+ * exclusive access to the SPI bus. If that is not the case, the
+ * caller has to use the begin() method to reinitialize the SPI
+ * hardware with its speed, endianness, and mode
+ *
+ */
+
+/*
 
 From the datasheet for the 25LC640 (64kbit) EEPROM:
 
@@ -43,46 +65,69 @@ From the datasheet for the 25LC640 (64kbit) EEPROM:
 
 http://datasheet.octopart.com/25LC640A-I/P-Microchip-datasheet-537224.pdf
 
-Note: this library assumes that the program using the EEPROM has
-exclusive access to the SPI bus. If that is not the case, the caller
-has to use the begin() method to reinitialize the SPI hardware with
-its speed, endianness, and mode
-
 */
 
-#include "wirish.h"
-#include "eeprom_25xxx.h"
-#include "EEPROM25xxx.h"
 
+/**
+ * @brief Create a new EEPROM25xxx object 
+ * @param newChipSelectPin number of the pin the EEPROM's chip select pin is connected to
+ * @param newSpiNum of the spi port the EEPROM is connected to, 1 or 2
+ */
 EEPROM25xxx::EEPROM25xxx(int newChipSelectPin, uint32 newSpiNum) {
     chipSelectPin = newChipSelectPin;
     spiNum = newSpiNum;
 }
 
+/**
+ * @brief Initialize the EEPROM and the SPI port
+ */
 void EEPROM25xxx::begin(void) {
     eeprom_25xxx_begin(spiNum, chipSelectPin);
 }
 
+/**
+ * @brief Write a single byte to the EEPROM
+ * @param address EEPROM memory address to access
+ * @param data byte of data to write 
+ */
 void EEPROM25xxx::write(uint16 address, uint8 data) {
     eeprom_25xxx_write(spiNum, chipSelectPin, address, data);
 }
 
+/**
+ * @brief Read a single byte from the EEPROM
+ * @param address EEPROM memory address to access
+ */
 uint8 EEPROM25xxx::read(uint16 address) {
     return eeprom_25xxx_read(spiNum, chipSelectPin, address);
 }
 
+/**
+ * @brief Query the EEPROM to see if a write is in progress
+ */
 boolean EEPROM25xxx::writeInProgress(void) {
     return eeprom_25xxx_write_in_progress(spiNum, chipSelectPin);
 }
 
+/**
+ * @brief Query the EEPROM to see if it is ready to be written to
+ */
 boolean EEPROM25xxx::writeEnabled(void) {
     return eeprom_25xxx_write_enabled(spiNum, chipSelectPin);
 }
 
+/**
+ * @brief Disable the EEPROM using the Chip Select line
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ */
 void EEPROM25xxx::disable(void) {
     eeprom_25xxx_disable(chipSelectPin);
 }
 
+/**
+ * @brief Enable the EEPROM using the Chip Select line
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ */
 void EEPROM25xxx::enable(void) {
     eeprom_25xxx_enable(chipSelectPin);
 }

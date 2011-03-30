@@ -25,7 +25,26 @@ THE SOFTWARE.
 
 See http://creativecommons.org/licenses/MIT/ for more information.
 
-This library works with the following EEPROMs: 25xx640, 25xx128, 25xx512, 25xx1024
+*/
+
+
+/**
+ * @brief Microchip 25xxx SPI EEPROM interface
+ * 
+ * This driver works with the following EEPROMs: 25xx640, 25xx128, 25xx512, 25xx1024 
+ *
+ * It only implements single-byte read and write.
+ *
+ * Chip enable and disable functions are provided as a convenience.
+ *
+ * Note: this library assumes that the program using the EEPROM has
+ * exclusive access to the SPI bus. If that is not the case, the
+ * caller has to use the begin() method to reinitialize the SPI
+ * hardware with its speed, endianness, and mode
+ *
+ */
+
+/*
 
 From the datasheet for the 25LC640 (64kbit) EEPROM:
 
@@ -43,18 +62,20 @@ From the datasheet for the 25LC640 (64kbit) EEPROM:
 
 http://datasheet.octopart.com/25LC640A-I/P-Microchip-datasheet-537224.pdf
 
-Note: this library assumes that the program using the EEPROM has
-exclusive access to the SPI bus. If that is not the case, the caller
-has to use the begin() method to reinitialize the SPI hardware with
-its speed, endianness, and mode
-
 */
+
 
 #include "libmaple.h"
 #include "spi.h"
 #include "wirish.h"
 #include "eeprom_25xxx.h"
 
+
+/**
+ * @brief Initialize the EEPROM and the SPI port
+ * @param spi_num number of the spi port the EEPROM is connected to, 1 or 2
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ */
 void eeprom_25xxx_begin(uint32 spi_num, uint8 chip_select_pin) {
     pinMode(chip_select_pin, OUTPUT);
     eeprom_25xxx_disable(chip_select_pin);
@@ -69,7 +90,13 @@ void eeprom_25xxx_begin(uint32 spi_num, uint8 chip_select_pin) {
     spi_init(spi_num, prescale, SPI_MSBFIRST, SPI_MODE_0);
 }
 
-// write one byte
+/**
+ * @brief Write a single byte to the EEPROM
+ * @param spi_num number of the spi port the EEPROM is connected to, 1 or 2
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ * @param address EEPROM memory address to access
+ * @param data byte of data to write 
+ */
 void eeprom_25xxx_write(uint32 spi_num, uint8 chip_select_pin, uint16 address, uint8 data) {
     eeprom_25xxx_enable(chip_select_pin);
     spi_tx_byte(spi_num, WREN); 
@@ -86,7 +113,12 @@ void eeprom_25xxx_write(uint32 spi_num, uint8 chip_select_pin, uint16 address, u
     eeprom_25xxx_disable(chip_select_pin);
 }
 
-// read one byte
+/**
+ * @brief Read a single byte from the EEPROM
+ * @param spi_num number of the spi port the EEPROM is connected to, 1 or 2
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ * @param address EEPROM memory address to access
+ */
 uint8 eeprom_25xxx_read(uint32 spi_num, uint8 chip_select_pin, uint16 address) {
   uint8 data;
   eeprom_25xxx_enable(chip_select_pin);
@@ -97,6 +129,11 @@ uint8 eeprom_25xxx_read(uint32 spi_num, uint8 chip_select_pin, uint16 address) {
   return data;
 }
 
+/**
+ * @brief Send an address to the EEPROM via the SPI port
+ * @param spi_num number of the spi port the EEPROM is connected to, 1 or 2
+ * @param address EEPROM memory address to send
+ */
 void eeprom_25xxx_send_address(uint32 spi_num, uint16 address) {
     uint8 most_significant_byte = address>>8;
     uint8 least_significant_byte = address;
@@ -104,14 +141,30 @@ void eeprom_25xxx_send_address(uint32 spi_num, uint16 address) {
     spi_tx_byte(spi_num, least_significant_byte);
 }
 
+/**
+ * @brief Query the EEPROM to see if a write is in progress
+ * @param spi_num number of the spi port the EEPROM is connected to, 1 or 2
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ */
 boolean eeprom_25xxx_write_in_progress(uint32 spi_num, uint8 chip_select_pin) {
     return eeprom_25xxx_read_status_register_bit(spi_num, chip_select_pin, WIP_MASK);
 }
 
+/**
+ * @brief Query the EEPROM to see if it is ready to be written to
+ * @param spi_num number of the spi port the EEPROM is connected to, 1 or 2
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ */
 boolean eeprom_25xxx_write_enabled(uint32 spi_num, uint8 chip_select_pin) {
     return eeprom_25xxx_read_status_register_bit(spi_num, chip_select_pin, WEL_MASK);
 }
 
+/**
+ * @brief Read a single status register bit
+ * @param spi_num number of the spi port the EEPROM is connected to, 1 or 2
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ * @param mask bit mask that is ANDed to the status register to test a particular bit
+ */
 boolean eeprom_25xxx_read_status_register_bit(uint32 spi_num, uint8 chip_select_pin, uint8 mask) {
     uint8 data;
     eeprom_25xxx_enable(chip_select_pin);
@@ -125,10 +178,18 @@ boolean eeprom_25xxx_read_status_register_bit(uint32 spi_num, uint8 chip_select_
     }
 }
 
+/**
+ * @brief Disable the EEPROM using the Chip Select line
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ */
 void eeprom_25xxx_disable(uint8 chip_select_pin) {
   digitalWrite(chip_select_pin, HIGH);    
 }
 
+/**
+ * @brief Enable the EEPROM using the Chip Select line
+ * @param chip_select_pin number of the pin the EEPROM's chip select pin is connected to
+ */
 void eeprom_25xxx_enable(uint8 chip_select_pin) {
   digitalWrite(chip_select_pin, LOW); 
 }
