@@ -1,6 +1,6 @@
 /*
 
-EEPROM_25xxx.h
+eeprom25xxx.h
 Microchip 25xxx EEPROM Library for Maple 
 
 Copyright (c) 2011 Adam Feuer
@@ -45,25 +45,46 @@ http://datasheet.octopart.com/25LC640A-I/P-Microchip-datasheet-537224.pdf
   
 */
 
-#ifndef EEPROM_25xxx_h
-#define EEPROM_25xxx_h
+#ifndef eeprom_25xxx_h
+#define eeprom_25xxx_h
 
-#include <wirish.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class EEPROM25xxx {
-  private:
-    int chipSelectPin;
-    uint32 spiNum;
-  public:
-    EEPROM25xxx(int, uint32);
-    void begin(void);
-    void write(uint16, uint8);
-    uint8 read(uint16);
-    boolean writeInProgress(void);
-    boolean writeEnabled(void);
-    void disable(void);
-    void enable(void);
-};
+#define EEPROM_SPI1_9MHZ SPI_PRESCALE_4
+#define EEPROM_SPI2_9MHZ SPI_PRESCALE_8
+
+#define DEFAULT_CHIP_SELECT_PIN 10
+#define DEFAULT_SPI_PORT 1
+#define SPI_MODE_0 0
+#define DUMMY_DATA 0xff
+
+// EEPROM opcodes
+#define WREN  6
+#define WRDI  4
+#define RDSR  5
+#define WRSR  1
+#define READ  3
+#define WRITE 2
+
+// EEPROM Status Register bitmasks
+#define WIP_MASK 0x01
+#define WEL_MASK 0x02
+
+void eeprom_25xxx_begin(uint32 spi_num, uint8 chip_select_pin);
+void eeprom_25xxx_write(uint32 spi_num, uint8 chip_select_pin, uint16 address, uint8 data);
+uint8 eeprom_25xxx_read(uint32 spi_num, uint8 chip_select_pin, uint16 address);
+void eeprom_25xxx_send_address(uint32 spi_num, uint16 address);
+boolean eeprom_25xxx_write_in_progress(uint32 spi_num, uint8 chip_select_pin);
+boolean eeprom_25xxx_write_enabled(uint32 spi_num, uint8 chip_select_pin);
+boolean eeprom_25xxx_read_status_register_bit(uint32 spi_num, uint8 chip_select_pin, uint8 mask);
+void eeprom_25xxx_disable(uint8 chip_select_pin);
+void eeprom_25xxx_enable(uint8 chip_select_pin);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

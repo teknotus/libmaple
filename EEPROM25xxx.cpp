@@ -51,80 +51,39 @@ its speed, endianness, and mode
 */
 
 #include "wirish.h"
+#include "eeprom25xxx.h"
 #include "EEPROM25xxx.h"
 
-EEPROM25xxx::EEPROM25xxx(int newChipSelectPin, HardwareSPI *newSpi) {
+EEPROM25xxx::EEPROM25xxx(int newChipSelectPin, uint32 newSpiNum) {
     chipSelectPin = newChipSelectPin;
-    spiPtr = newSpi;
+    spiNum = newSpiNum;
 }
 
 void EEPROM25xxx::begin(void) {
-    pinMode(chipSelectPin, OUTPUT);
-    disable();
-    spiPtr->begin(SPI_9MHZ, MSBFIRST, SPI_MODE_0);
+    eeprom_25xxx_begin(spiNum, chipSelectPin);
 }
 
-// write one byte
 void EEPROM25xxx::write(uint16 address, uint8 data) {
-  enable();
-  spiPtr->send(WREN); 
-  disable(); // Needed for EEPROM to accept write enable (WREN) opcode
-  enable();
-  spiPtr->send(WRITE); 
-  sendAddress(address);
-  spiPtr->send(data); 
-  disable(); // Needed for EEPROM to initiate write cycle
-  enable();
-  while (writeInProgress()) {
-    // do nothing - busy wait, otherwise we get write errors
-  }
-  disable();
+    eeprom_25xxx_write(spiNum, chipSelectPin, address, data);
 }
 
-// read one byte
 uint8 EEPROM25xxx::read(uint16 address) {
-  uint8 data;
-  enable();
-  spiPtr->send(READ); 
-  sendAddress(address);
-  data = spiPtr->send(DUMMY_DATA);
-  disable();
-  return data;
-}
-
-void EEPROM25xxx::sendAddress(uint16 address) {
-  uint8 most_significant_byte = address>>8;
-  uint8 least_significant_byte = address;
-  spiPtr->send(most_significant_byte);      
-  spiPtr->send(least_significant_byte);
+    return eeprom_25xxx_read(spiNum, chipSelectPin, address);
 }
 
 boolean EEPROM25xxx::writeInProgress(void) {
-  return readStatusRegisterBit(WIP_MASK);
+    return eeprom_25xxx_write_in_progress(spiNum, chipSelectPin);
 }
 
 boolean EEPROM25xxx::writeEnabled(void) {
-  return readStatusRegisterBit(WEL_MASK);
-}
-
-boolean EEPROM25xxx::readStatusRegisterBit(uint8 mask) {
-  uint8 data;
-  enable();
-  spiPtr->send(RDSR); 
-  data = spiPtr->send(DUMMY_DATA);
-  disable();
-  if (data && mask) {
-    return true;
-  } else {
-    return false;
-  }
+    return eeprom_25xxx_write_enabled(spiNum, chipSelectPin);
 }
 
 void EEPROM25xxx::disable(void) {
-  digitalWrite(chipSelectPin, HIGH);    
+    eeprom_25xxx_disable(chipSelectPin);
 }
 
 void EEPROM25xxx::enable(void) {
-  digitalWrite(chipSelectPin, LOW); 
+    eeprom_25xxx_enable(chipSelectPin);
 }
 
