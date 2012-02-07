@@ -1,7 +1,10 @@
+#include "main.h"
 #include "libmaple.h"
 #include "wirish.h"
-#include "lights/lights.h"
 #include "libraries/WiShield/WiShield.h"
+#include "libraries/WiShield/psock.h"
+#include <string.h>
+
 
 /* Begin gank from asynclabs  */
 #define WIRELESS_MODE_INFRA    1
@@ -13,16 +16,16 @@
 // unsigned char subnet_mask[] = {255, 0, 0, 0};         // subnet mask for the local network
 // const char    ssid[]        = {"545meraki"};     // max 32 bytes
 
-unsigned char local_ip[]    = {192, 168, 1,   4};         // IP address of WiShield
-unsigned char gateway_ip[]  = {192, 168, 1,   1};         // router or gateway IP address
+unsigned char local_ip[]    = {192, 168, 2,   2};         // IP address of WiShield
+unsigned char gateway_ip[]  = {192, 168, 2,   1};         // router or gateway IP address
 unsigned char subnet_mask[] = {255, 255, 255, 0};         // subnet mask for the local network
-const char    ssid[]        = {"ether"};     // max 32 bytes
+const char    ssid[]        = {"linksys"};     // max 32 bytes
 
 
 unsigned char security_type = 0;                           // 0 - open; 1 - WEP; 2 - WPA; 3 - WPA2
 
 /* WPA/WPA2 passphrase */
-const char security_passphrase[] = {"12345678"};           // max 64 characters
+const char security_passphrase[] = {""};           // max 64 characters
 
 /* WEP 128-bit keys */
 const char wep_keys[] = {
@@ -40,41 +43,34 @@ unsigned char wireless_mode = WIRELESS_MODE_INFRA;
 unsigned char ssid_len;
 unsigned char security_passphrase_len;
 /* End gank  */
+extern "C" {
+const unsigned char hello_str[] = {"hello world!\n"};
+
+static int handle_connection(struct hello_state *s)
+{
+ PSOCK_BEGIN(&s->p);
+ PSOCK_SEND(&s->p, hello_str, 13);
+ PSOCK_CLOSE(&s->p);
+ PSOCK_END(&s->p);
+}
+
+void hello_appcall(void)
+{
+ struct hello_state *s = &(uip_conn->appstate);
+ if(uip_connected()) {
+  PSOCK_INIT(&s->p, (unsigned char*)s->inputbuffer, sizeof(s->inputbuffer));
+ }
+ handle_connection(s);
+}
+}// extern "C"
 
 void setup()
 {
-   int i;
-   float h, s, v;
-   float r, g, b;
-
-   h = 0.0;
-   s = 1.0;
-   v = 1.0;
-
-   pinMode(10, OUTPUT);
-   digitalWrite(10, HIGH);
-
    Serial2.begin(115200);
-
-   pinMode(RED_PIN, PWM);
-   pinMode(GREEN_PIN, PWM);
-   pinMode(BLUE_PIN, PWM);
-
-   lights_set_rgb(0.5, 0.5, 0.5);
-   while (millis() < 3000) {
-//   while (1) {
-      HSVtoRGB(&r, &g, &b, h, 1.0, 1.0);
-      lights_set_rgb(r, g, b);
-
-      h += 0.01;
-      if (h >= 360) {
-         h = 0;
-      }
-   }
    WiFi.init();
+   uip_listen(HTONS(1000));
 }
 
-/* d3 d5 d6  */
 void loop()
 {
    WiFi.run();
