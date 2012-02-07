@@ -29,7 +29,7 @@ LIBMAPLE_PATH := $(SRCROOT)/libmaple
 SUPPORT_PATH := $(SRCROOT)/support
 
 # Useful variables
-GLOBAL_CFLAGS   := -Os -g -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
+GLOBAL_CFLAGS   := -Os -g -Wall -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
                    -ffunction-sections -fdata-sections -Wl,--gc-sections   \
                    -DBOARD_$(BOARD) -DMCU_$(MCU)
 GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall -DBOARD_$(BOARD) -DMCU_$(MCU)
