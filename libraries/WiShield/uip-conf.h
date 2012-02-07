@@ -107,7 +107,7 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_CONF_UDP             1
+#define UIP_CONF_UDP             0
 
 /**
  * UDP checksums on or off
@@ -128,7 +128,7 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_CONF_BROADCAST		1
+#define UIP_CONF_BROADCAST		0
 
 /**
  * The maximum amount of concurrent UDP connections.
