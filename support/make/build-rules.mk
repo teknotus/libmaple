@@ -10,6 +10,7 @@ OBJDUMP  := arm-none-eabi-objdump
 SIZE     := arm-none-eabi-size
 DFU      := dfu-util
 OPENOCD  := openocd
+V := true
 
 # Suppress annoying output unless V is set
 ifndef V
