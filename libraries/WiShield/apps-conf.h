@@ -39,8 +39,13 @@
 //#define APP_WEBSERVER
 //#define APP_WEBCLIENT
 //#define APP_SOCKAPP
-#define APP_UDPAPP
+//#define APP_UDPAPP
 //#define APP_WISERVER
+#define APP_MAIN
+
+#ifdef APP_MAIN
+#include "../../main.h"
+#endif
 
 #ifdef APP_WEBSERVER
 #include "webserver.h"
