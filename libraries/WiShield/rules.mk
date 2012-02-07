@@ -23,7 +23,6 @@ cSRCS_$(d) :=   network.c                      \
                 uip_arp.c                      \
                 stack.c                        \
                 uip.c                          \
-                udpapp.c
 
 #                 examples/UDPApp/udpapp.c       \
 #                 examples/SocketApp/socketapp.c \
