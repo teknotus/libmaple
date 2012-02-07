@@ -275,11 +275,11 @@
  *
  * \hideinitializer
  */
-#ifndef UIP_CONF_MAX_CONNECTIONS
-#define UIP_CONNS       10
-#else /* UIP_CONF_MAX_CONNECTIONS */
-#define UIP_CONNS UIP_CONF_MAX_CONNECTIONS
-#endif /* UIP_CONF_MAX_CONNECTIONS */
+//#ifndef UIP_CONF_MAX_CONNECTIONS
+//#define UIP_CONNS       10
+//#else /* UIP_CONF_MAX_CONNECTIONS */
+//#define UIP_CONNS UIP_CONF_MAX_CONNECTIONS
+//#endif /* UIP_CONF_MAX_CONNECTIONS */
 
 
 /**
@@ -410,11 +410,11 @@
  *
  * \hideinitializer
  */
-#ifndef UIP_CONF_BUFFER_SIZE
-#define UIP_BUFSIZE     400
-#else /* UIP_CONF_BUFFER_SIZE */
-#define UIP_BUFSIZE UIP_CONF_BUFFER_SIZE
-#endif /* UIP_CONF_BUFFER_SIZE */
+//#ifndef UIP_CONF_BUFFER_SIZE
+//#define UIP_BUFSIZE     400
+//#else /* UIP_CONF_BUFFER_SIZE */
+//#define UIP_BUFSIZE UIP_CONF_BUFFER_SIZE
+//#endif /* UIP_CONF_BUFFER_SIZE */
 
 
 /**
